@@ -94,7 +94,7 @@ distance<- function(ssslong,ssslat,jsslong,jsslat){
 datstu_c$dist <- distance(datstu_c$ssslong,datstu_c$ssslat,datstu_c$jsslong,datstu_c$jsslat)
 
 # Exercise 4 ----
-# For each ranked choice
+# For each ranked choice (can not understand the meaning of the question)
 rankedDescrip <- aggregate(datstu_c$score,list(datstu_c$rankplace),min)
 rankedDescrip <- aggregate(datstu_c$score,list(datstu_c$rankplace),mean)
 rankedDescrip <- aggregate(datstu_c$score,list(datstu_c$rankplace),min)
