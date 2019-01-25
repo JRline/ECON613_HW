@@ -47,19 +47,20 @@ datsss <- datsss[!duplicated(datsss$schoolcode),] # take out NA and repeat
 choice <- choice[order(choice[,1]),] # ranking for observation
 schoolLevel <- merge(choice,datsss,by.x="school",by.y="schoolcode")
 
-# Adding admission result 
-datstu_c <- datstu[!(is.na(datstu$rankplace)|datstu$rankplace == 99),] # clean NA and 99 in datstu (datstu_c only has admitted students)
+# Adding admission result (NOTE: there are schools not admitting students,like 10123)
+datstu_c <- datstu[!(is.na(datstu$rankplace)|datstu$rankplace == 99),] # clean NA and 99 in datstu 
+# (datstu_c only has admitted students) (selecing 99 only should use which)
 datstu_c$resultSchool <- datstu_c[cbind(seq_along(datstu_c$rankplace),datstu_c$rankplace+4)] # add result school
 datstu_c$resultProgram <- datstu_c[cbind(seq_along(datstu_c$rankplace),datstu_c$rankplace+10)] # add result program
 datstu_c$resultSchool <- as.integer(datstu_c$resultSchool) # change the school code from character to integer for future comparison
 
 
 # tapply function (qualtiy, cutoff, size by school and program)
-quality <- aggregate(datstu_c$score,list(datstu_c$resultSchool,datstu_c$resultProgram),mean)
+quality <- aggregate(datstu_c$score,list(datstu_c$resultSchool,datstu_c$resultProgram),mean) # same as tapply but has output as data.frame
 cutoff <- aggregate(datstu_c$score,list(datstu_c$resultSchool,datstu_c$resultProgram),min)
 size <- aggregate(datstu_c$score,list(datstu_c$resultSchool,datstu_c$resultProgram),length)
 
-# Merging the result back to schoollevel (I noticed that there are programs who didn't admit student)
+# Merging the result back to schoollevel
 schoolLevel <- merge(schoolLevel,quality,by.x=c("school","program"),by.y=c("Group.1","Group.2"))
 schoolLevel <- merge(schoolLevel,cutoff,by.x=c("school","program"),by.y=c("Group.1","Group.2"))
 schoolLevel <- merge(schoolLevel,size,by.x=c("school","program"),by.y=c("Group.1","Group.2"))
@@ -122,27 +123,24 @@ Descriptive2$Dist_Average <- aggregate(datstu_c$dist,list(datstu_c$score_quantil
 Descriptive2$Dist_sd <- aggregate(datstu_c$dist,list(datstu_c$score_quantile),sd)[,2]
 
 # Exercise 5 ----
-#By selectivity (only for student who have score)
-schoolLevel$selectivity_decile <- cut(schoolLevel$cutoff, quantile(schoolLevel$cutoff,prob = seq(0, 1, length = 11), type = 5),
+#By selectivity (I can't obtain the selectivity info for school who are not admitting, so they left out as NA)
+schoolLevel$selectivity_cutoff <- cut(schoolLevel$cutoff, quantile(schoolLevel$cutoff,prob = seq(0, 1, length = 11), type = 5),
                                       labels = c("1","2","3","4","5","6","7","8","9","10"),include.lowest=TRUE)
 
-datstu_c <- merge(datstu_c,schoolLevel[,c("school","program","selectivity_decile")],by.x=c("schoolcode1","choicepgm1"),by.y = c("school","program"),all.x = TRUE)
-names(datstu_c)[ncol(datstu_c)]<- "selectivity_1"
-datstu_c <- merge(datstu_c,schoolLevel[,c(1:2,10)],by.x=c("schoolcode2","choicepgm2"),by.y = c("school","program"), all.x = TRUE,sort = FALSE)
-names(datstu_c)[ncol(datstu_c)]<- "selectivity_2"
-datstu_c <- merge(datstu_c,schoolLevel[,c(1:2,10)],by.x=c("schoolcode3","choicepgm3"),by.y = c("school","program"), all.x = TRUE,sort = FALSE)
-names(datstu_c)[ncol(datstu_c)]<- "selectivity_3"
-datstu_c <- merge(datstu_c,schoolLevel[,c(1:2,10)],by.x=c("schoolcode4","choicepgm4"),by.y = c("school","program"), all.x = TRUE,sort = FALSE)
-names(datstu_c)[ncol(datstu_c)]<- "selectivity_4"
-datstu_c <- merge(datstu_c,schoolLevel[,c(1:2,10)],by.x=c("schoolcode5","choicepgm5"),by.y = c("school","program"), all.x = TRUE,sort = FALSE)
-names(datstu_c)[ncol(datstu_c)]<- "selectivity_5"
-datstu_c <- merge(datstu_c,schoolLevel[,c(1:2,10)],by.x=c("schoolcode6","choicepgm6"),by.y = c("school","program"), all.x = TRUE,sort = FALSE)
-names(datstu_c)[ncol(datstu_c)]<- "selectivity_6"
-datstu_c$groups <- apply(datstu_c[,c((ncol(datstu_c)-5):ncol(datstu_c))],1,function(x)length(unique(x)))
+for (i in 1:6) {
+  datstu_c <- merge(datstu_c,schoolLevel[,c(1:2,10)],by.x=c(paste("schoolcode",i,sep = ""),paste("choicepgm",i,sep = "")),
+                    by.y = c("school","program"),all.x = TRUE,sort = FALSE)
+  names(datstu_c)[ncol(datstu_c)]<- paste("selectivity_c",i,sep = "")
+}
+datstu_c$groups_cutoff <- apply(datstu_c[,c((ncol(datstu_c)-5):ncol(datstu_c))],1,function(x)length(unique(na.omit(x))))
 
-#By test score quantile (only for student who have score) (REALLY HAVE NO IDEA)
-# byDecile <- aggregate(datstu_c[,c(31:36)],list(datstu_c$score_quantile),as.vector)
-# byDecile[,1] <- NULL
-# byDecile$groups <- apply(byDecile,1,function(x)length(unique(c(x))))
-# byDecile$Decile <- seq(1:4)
-# byDecile[,1:6] <- NULL
+# "Redo this, by student test score (quantile)" 
+schoolLevel$selectivity_quality <- cut(schoolLevel$quality, quantile(schoolLevel$quality,prob = seq(0, 1, length = 11), type = 5),
+                                      labels = c("1","2","3","4","5","6","7","8","9","10"),include.lowest=TRUE)
+
+for (i in 1:6) {
+  datstu_c <- merge(datstu_c,schoolLevel[,c(1:2,11)],by.x=c(paste("schoolcode",i,sep = ""),paste("choicepgm",i,sep = "")),
+                    by.y = c("school","program"),all.x = TRUE,sort = FALSE)
+  names(datstu_c)[ncol(datstu_c)]<- paste("selectivity_q",i,sep = "")
+}
+datstu_c$groups_quality <- apply(datstu_c[,c((ncol(datstu_c)-5):ncol(datstu_c))],1,function(x)length(unique(na.omit(x))))
