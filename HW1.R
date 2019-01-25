@@ -43,13 +43,13 @@ datsss <- datsss[order(datsss[,1]),]
 datsss <- na.omit((datsss[!grepl("[[:digit:]]{5}",datsss$schoolname),])) # take out those school names with school code mixed in
 datsss <- datsss[!duplicated(datsss$schoolcode),] # take out NA and repeat
 
-# Merging (add s.distric and s.location to choice)
+# Merging (add s.distric and s.location to choice, generating new data set schoolLevel)
 choice <- choice[order(choice[,1]),] # ranking for observation
 schoolLevel <- merge(choice,datsss,by.x="school",by.y="schoolcode")
 
 # Adding admission result (NOTE: there are schools not admitting students,like 10123)
 datstu_c <- datstu[!(is.na(datstu$rankplace)|datstu$rankplace == 99),] # clean NA and 99 in datstu 
-# (datstu_c only has admitted students) (selecing 99 only should use which)
+# (datstu_c only has admitted students) (if selecing == 99 only should use which())
 datstu_c$resultSchool <- datstu_c[cbind(seq_along(datstu_c$rankplace),datstu_c$rankplace+4)] # add result school
 datstu_c$resultProgram <- datstu_c[cbind(seq_along(datstu_c$rankplace),datstu_c$rankplace+10)] # add result program
 datstu_c$resultSchool <- as.integer(datstu_c$resultSchool) # change the school code from character to integer for future comparison
@@ -89,17 +89,18 @@ distance<- function(ssslong,ssslat,jsslong,jsslat){
 datstu_c$dist <- distance(datstu_c$ssslong,datstu_c$ssslat,datstu_c$jsslong,datstu_c$jsslat)
 
 # Exercise 4 ----
-# For each ranked choice (can not understand the meaning of the question)
+# For each ranked choice
+# Creating rankedChoice include the school, program, dist, and rank (like schoollevel but added rank)
 school_c <- as.vector(as.matrix(datstu_c[,7:12]))
 program_c <- as.vector(as.matrix(datstu_c[,13:18]))
 
-rankedChoice<- as.data.frame(unique(cbind(school_c, program_c,datstu_c$dist,rep(1:6,each = length(datstu_c$X)))))
+rankedChoice<- as.data.frame(unique(cbind(school_c, program_c,datstu_c$dist,rep(1:6,each = length(datstu_c$X))))) 
 names(rankedChoice)[3] <- "dist"
 names(rankedChoice)[4] <- "rank"
-rankedChoice <- merge(rankedChoice, schoolLevel[,c(1:2,7:9)], by.x=c("program_c","school_c"),by.y=c("program","school"),sort=FALSE)
+rankedChoice <- merge(rankedChoice, schoolLevel[,c(1:2,7:9)], by.x=c("program_c","school_c"),by.y=c("program","school"), sort=FALSE)
 rankedChoice$dist <- as.numeric(as.character(rankedChoice$dist)) # Data formating issue
 
-#calculate desciptive
+# Calculate desciptive by ranked choice
 Descriptive1 <- aggregate(rankedChoice$cutoff,list(rankedChoice$rank),mean)
 names(Descriptive1)[2] <- "Cutoff_Average"
 Descriptive1$Cutoff_sd <- aggregate(rankedChoice$cutoff,list(rankedChoice$rank),sd)[,2]
@@ -123,8 +124,8 @@ Descriptive2$Dist_Average <- aggregate(datstu_c$dist,list(datstu_c$score_quantil
 Descriptive2$Dist_sd <- aggregate(datstu_c$dist,list(datstu_c$score_quantile),sd)[,2]
 
 # Exercise 5 ----
-#By selectivity (I can't obtain the selectivity info for school who are not admitting, so they left out as NA)
-schoolLevel$selectivity_cutoff <- cut(schoolLevel$cutoff, quantile(schoolLevel$cutoff,prob = seq(0, 1, length = 11), type = 5),
+#By selectivity (I can't obtain the selectivity info for school who are not admitting students, so they left out as NA)
+schoolLevel$selectivity_cutoff <- cut(schoolLevel$cutoff, quantile(schoolLevel$cutoff,prob = seq(0, 1, length = 11)),
                                       labels = c("1","2","3","4","5","6","7","8","9","10"),include.lowest=TRUE)
 
 for (i in 1:6) {
@@ -135,7 +136,7 @@ for (i in 1:6) {
 datstu_c$groups_cutoff <- apply(datstu_c[,c((ncol(datstu_c)-5):ncol(datstu_c))],1,function(x)length(unique(na.omit(x))))
 
 # "Redo this, by student test score (quantile)" 
-schoolLevel$selectivity_quality <- cut(schoolLevel$quality, quantile(schoolLevel$quality,prob = seq(0, 1, length = 11), type = 5),
+schoolLevel$selectivity_quality <- cut(schoolLevel$quality, quantile(schoolLevel$quality,prob = seq(0, 1, length = 11)),
                                       labels = c("1","2","3","4","5","6","7","8","9","10"),include.lowest=TRUE)
 
 for (i in 1:6) {
@@ -144,3 +145,6 @@ for (i in 1:6) {
   names(datstu_c)[ncol(datstu_c)]<- paste("selectivity_q",i,sep = "")
 }
 datstu_c$groups_quality <- apply(datstu_c[,c((ncol(datstu_c)-5):ncol(datstu_c))],1,function(x)length(unique(na.omit(x))))
+
+# Output my result ----
+
