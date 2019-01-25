@@ -14,17 +14,21 @@ stuNum <-length(datstu$X)
 # Number of school 
 school <- as.vector(as.matrix(datstu[,5:10]))
 schoolNum <- length(na.omit(unique(school)))
+schoolNum
 
 # Number of program
 program <- as.vector(as.matrix(datstu[,11:16]))
 programNum <- length(na.omit(unique(program)))
+programNum
 
 # Number of Choice
 choice <- as.data.frame(na.omit(unique(cbind(school, program))))
 choiceNum <- nrow(choice)
+choiceNum
 
 # Number of NA's in the score
 missing <- sum(is.na(datstu$score))
+missing
 
 # Apply to the same school
 app <- na.omit((cbind(rep(1:stuNum,6),school))) #combine with school directly,and take out repeat and NA's 
@@ -33,6 +37,7 @@ sameSchool <- as.data.frame(table(app[,2]))
 
 # Num of Students who apply for less than 6
 lessThan_6 <- sum(apply(datstu[,c(5:10)],1,is.na))
+lessThan_6
 
 # Exercise 2 ----
 # Cleaning datsss
@@ -146,5 +151,10 @@ for (i in 1:6) {
 }
 datstu_c$groups_quality <- apply(datstu_c[,c((ncol(datstu_c)-5):ncol(datstu_c))],1,function(x)length(unique(na.omit(x))))
 
-# Output my result ----
+# Outputing my result ----
 
+# write.csv(sameSchool,file = "Ex1_Apply to Same School.csv")
+# write.csv(datstu_c,file = "Ex5_Ex3_datstu_c.csv")
+# write.csv(schoolLevel,file = "Ex2_school Level.csv")
+# write.csv(Descriptive1,file = "Ex4_by Ranked Choice.csv")
+# write.csv(Descriptive2,file = "Ex4_by Score Quantile.csv")
