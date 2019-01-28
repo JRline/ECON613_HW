@@ -16,7 +16,6 @@ school <- c(as.matrix(datstu[,5:10]))
 schoolNum <- length(na.omit(unique(school)))
 schoolNum
 
-
 # Number of program
 program <- c(as.matrix(datstu[,11:16]))
 programNum <- length(na.omit(unique(program)))
@@ -60,7 +59,6 @@ datstu_c$resultSchool <- datstu_c[cbind(seq_along(datstu_c$rankplace),datstu_c$r
 datstu_c$resultProgram <- datstu_c[cbind(seq_along(datstu_c$rankplace),datstu_c$rankplace+10)] # add result program
 datstu_c$resultSchool <- as.integer(datstu_c$resultSchool) # change the school code from character to integer for future comparison
 
-
 # tapply function (qualtiy, cutoff, size by school and program)
 quality <- aggregate(datstu_c$score,list(datstu_c$resultSchool,datstu_c$resultProgram),mean) # same as tapply but has output as data.frame
 cutoff <- aggregate(datstu_c$score,list(datstu_c$resultSchool,datstu_c$resultProgram),min)
@@ -75,16 +73,15 @@ names(schoolLevel)[7] <- "quality"
 names(schoolLevel)[8] <- "cutoff"
 names(schoolLevel)[9] <- "size"
 
-# Exercise 3 ----
+# Exercise 3 ---- (I suppose that this is asking for the distance between jss and every choices the student made, so six distance for each student)
 # Cleaning datjsu
 datjsu <- na.omit(datjsu)
 datjsu$X <- NULL
 
 # adding the jss 's long and lat
-
 datstu <- merge(datstu,datjsu,by.x ="jssdistrict",by.y = "jssdistrict",all.x = TRUE,sort = FALSE) # one student don't have jss input
 
-# connecting jss district with sss district
+# connecting jss district with sss district (all possible distance)
 dis <- data.frame(rep(datstu$jssdistrict,times = 6),c(as.matrix(datstu[,6:11])),rep(datstu$point_x,times = 6),rep(datstu$point_y,times = 6))
 dis <- na.omit(dis[!duplicated(dis[c(1:2)]),])
 names(dis)[2]<-"school"
@@ -98,7 +95,7 @@ distance<- function(ssslong,ssslat,jsslong,jsslat){
 }
 dis$dist <- distance(dis$ssslong,dis$ssslat,dis$jsslong,dis$jsslat)
 
-# Merge the dist
+# Merge the dist back to datstu
 for (m in 1:6) {
   datstu <- merge(datstu,dis[,c(1:2,7)],by.x = c(paste("schoolcode",m,sep = ""),"jssdistrict"),by.y = c("highschool","jssdistrict"),all.x = TRUE)
   names(datstu)[ncol(datstu)]<- paste("dist",m,sep = "")
