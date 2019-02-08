@@ -1,0 +1,181 @@
+rm(list=ls())
+# Set Working directory
+setwd("C:/Users/jiere/Dropbox/Spring 2019/ECON 613/ECON613_HW")
+set.seed(100)
+
+# Exercise 1: Data generation ----
+obs <- 10000
+X1 <- runif(obs, max = 3, min = 1)
+X2 <- rgamma(obs,3,scale = 2)
+X3 <- rbinom(obs,1,0.3)
+eps <- rnorm(obs, mean = 2, sd = 1)
+Y <- 0.5 + 1.2*X1 - 0.9*X2 + 0.1*X3 + eps
+ydum <- ifelse(Y > mean(Y),1,0)
+mydata <- cbind(Y,ydum,X1,X2,X3,eps)
+
+# Exercise 2: ----
+# Correlation between Y and X1
+cor(Y,X1)
+# The correlation is limited from -1 to 1, so only thing we can tell is that there is a strong
+# positive correlation between these two variables, which match the fact that the coef on X1 is possitive.
+
+# Regression of Y on X where X = (1,X1,X2,X3) (Mannually)
+ols <- function(X,y,se=F){
+  n <- nrow(X)
+  k <- ncol(X)
+  ols.coef <- solve(t(X)%*%X)%*%(t(X)%*%y) #coefficient
+  ols.res <- (y-X%*%ols.coef) # residual
+  ols.V <- 1/(n-k) * as.numeric(t(ols.res)%*%ols.res)*solve(t(X)%*%X) #covariance matrix
+  ols.se <- as.matrix(sqrt(diag(ols.V))) #standard error
+  ifelse(se == T, return(data.frame(b_hat = ols.coef,se = ols.se)),return(data.frame(b_hat = ols.coef))) # output coef only by default
+}
+
+X <- cbind(1,X1,X2,X3)
+y <- as.matrix(Y)
+ols.result <- ols(X,y,se=T)
+ols.result
+
+# Check with lm function
+lm.result <- lm(Y~X1+X2+X3, data.frame(mydata))
+coef(summary(lm.result))[,c(1,2)] #coefficient & standard error
+
+# Boodstrap mannually
+bootstrapse <- function(n){
+  # Input times of bootstrap
+  boot.coef <- data.frame(matrix(nrow=4, ncol=1))[-1]
+  for (i in 1:n) {
+    # sample from existing data to get X.s, y.s
+    df.s <- mydata[sample(nrow(mydata),size = nrow(mydata),replace = T),]
+    y.s <- df.s[,1]
+    X.s <- cbind(1,df.s[,c(3:5)])
+    # calculate ols coefficient in each sample
+    boot.coef <- cbind(boot.coef,ols(X.s,y.s))
+  }
+  # Report the SE over all the obtained coefficients
+  return(data.frame(se = apply(boot.coef,1,sd)))
+}
+
+boot.se_49 <- bootstrapse(49)
+boot.se_499 <- bootstrapse(499)
+boot.se_49
+boot.se_499
+
+#Exercise 3: ----
+# likelihood function
+probit.llike <- function(b. = b, y. = ydum,X. = X){
+  phi <- pnorm(X.%*%b.)
+  phi[phi==1] <- 0.9999 # avoid NaN of log function
+  phi[phi==0] <- 0.0001
+  f <- sum(y.*log(phi))+sum((1-y.)*log(1-phi))
+  f <- -f
+  return(f)
+}
+
+# Optimizer using steepest ascent
+graddec <- function(b,stop,fun){
+  # By input a inial guess of parameter, relative stopping criteria (percentage change in function), and function, 
+  # using gradient decent method featuring backtracking line search, you can get the parameter that
+  # minimize the funtion. Note: First arguement of fun. must be the parameter you want to get, 
+  # X and y must be set into the default value.
+  d <- 0.001 # delta in the finite difference method
+  alpha <- 0.1 # any initial alpha
+  delta <- Inf
+  while (delta > stop){
+    # Calculate gradient for each regressor by Finite Difference Method
+    b. <- matrix(b,length(b),4)
+    g <- (apply(b. + diag(d,4),2,fun)-apply(b.,2,fun))/d
+    # Backtracking (Armijo–Goldstein condition tests to make sure the size of alpha)
+    if(fun(b - alpha*g)>fun(b)-0.1*alpha*t(g)%*%g){
+      alpha <- 0.5*alpha
+      next
+    }
+    # Make step forward (t+1) and saved in bn
+    bn <- b - alpha*g 
+    # Stopping Criteria 
+    delta <- (abs(fun(bn)-fun(b))/abs(fun(b)))
+    b <- bn
+  }
+  return(b)
+}
+result.gd <- graddec(c(0,0,0,0),1e-5,probit.llike)
+result.gd
+# Except the coefficient on constant, others are close, but still have a big difference.
+
+# Exercise 4 ----
+# Optimize Probit
+b.p <- c(0,0,0,0)
+result.p <- optim(par = b.p, probit.llike)
+result.p$par
+
+# Optimizing Logit
+logit.llike <- function(b., y. = ydum,X. = X){
+  gamma <- exp(X.%*%b.)/(1+exp(X.%*%b.))
+  f <- sum(y.*log(gamma))+sum((1-y.)*log(1-gamma))
+  f <- -f
+  return(f)
+}
+b.l <- c(0,0,0,0)
+result.l <- optim(par = b.l, logit.llike)
+result.l$par
+
+# Optimizing Linear Probability
+result.lp <- lm(ydum~X1+X2+X3)
+summary(result.lp)
+
+# Check significance with glm function
+result.p.glm <- glm(ydum ~ X1 + X2 + X3, family = binomial(link = "probit"), 
+                data = data.frame(mydata))
+coef(summary(result.p.glm))
+
+result.l.glm <- glm(ydum ~ X1 + X2 + X3, family = binomial(link = "logit"), 
+                data = data.frame(mydata))
+coef(summary(result.l.glm))
+
+# The coefficient varies largely across these three methods, but the sign on the coefficients are the same, and all X3 coefs
+# are not significant.For Probit and logit, without calcuating the marginal effect, we can only interprete the sign.
+# Higher X2 can decrease the probability of ydum = 1, which means higher X2 is likely to generate Y below mean. Higher X1 and 
+# X3 can increase the probability of ydum = 1, which means that higher X1 and X3 is likely to genrate Y above mean. This mathch 
+# the sign in the data generating process. For linear probability model, X1: one unit increase in X1 likely to increase the 
+# likelihood of ydum = 1 by 14%; X2: one unit increase in X2 likely to decrease the likelihood of ydum = 1 by 10%; 
+# X3: one unit increase in X3 likely to increase the likelihood of ydum = 1 by 1%
+
+# Exercise 5 ----
+# Compute Average Marginal Effect (AME) of X of probit
+AME.p <- function(result) mean(dnorm(X%*%result))*result # result are the parameters
+AME.p(coef(result.p.glm))
+# Compute Average Margeinal Effect of X of Logit
+AME.l <- function(result) mean(dlogis(X%*%result))*result
+AME.l(coef(result.l.glm))
+# Comment: Except the constant term, both models' average marginal effects are close to linear probability
+
+# Compute the Standard Error by delta method (Probit)
+# Using num derivative function to simplfy the calualtion
+# install.packages("numDeriv")
+library("numDeriv")
+
+gradient <- jacobian(AME.p, coef(result.p.glm))
+cov_matrixv <- vcov(result.p.glm)
+se.p <- diag(sqrt(gradient%*%cov_matrixv%*%t(gradient)))
+se.p
+# Compute the Standard Error by delta method (Logit)
+gradient <- jacobian(AME.l, coef(result.l.glm))
+cov_matrixv <- vcov(result.l.glm)
+se.l <- diag(sqrt(gradient%*%cov_matrixv%*%t(gradient)))
+se.l
+# Compute the SE of AME by Bootstrap (Probit and Logit)
+bootstrapse2 <- function(n,l){
+  # input bootstrap times and type of link function
+  boot.me <- data.frame(matrix(nrow=4, ncol=1))[-1]
+  for (i in 1:n) {
+    # sample from existing data to get X.s, y.s
+    df.s <- mydata[sample(nrow(mydata),size = nrow(mydata),replace = T),]
+    result <- glm(ydum ~ X1 + X2 + X3, family=binomial(link = l),data.frame(df.s))
+    # calculate ols coefficient in each sample
+    me <- mean(dnorm(predict.glm(result, type = "link")))*coef(result)
+    boot.me <- cbind(boot.me,me)
+  }
+  # Report the SE over all the obtained coefficients
+  return(data.frame(se = apply(boot.me,1,sd)))
+}
+bootstrapse2(49,"probit")
+bootstrapse2(49,"logit")
