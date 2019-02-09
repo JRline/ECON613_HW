@@ -82,8 +82,8 @@ graddec <- function(b,stop,fun){
   delta <- Inf
   while (delta > stop){
     # Calculate gradient for each regressor by Finite Difference Method
-    b. <- matrix(b,length(b),4)
-    g <- (apply(b. + diag(d,4),2,fun)-apply(b.,2,fun))/d
+    b. <- matrix(b,length(b),length(b))
+    g <- (apply(b. + diag(d,length(b)),2,fun)-apply(b.,2,fun))/d
     # Backtracking (Armijo–Goldstein condition tests to make sure the size of alpha)
     if(fun(b - alpha*g)>fun(b)-0.1*alpha*t(g)%*%g){
       alpha <- 0.5*alpha
