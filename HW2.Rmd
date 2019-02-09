@@ -16,7 +16,7 @@ rm(list=ls())
 setwd("C:/Users/jiere/Dropbox/Spring 2019/ECON 613/ECON613_HW")
 ```
 
-##Exercise 1: Data generation ---
+### Exercise 1: Data generation ---
 ```{r Ex1}
 obs <- 10000
 X1 <- runif(obs, max = 3, min = 1)
@@ -27,14 +27,14 @@ Y <- 0.5 + 1.2*X1 - 0.9*X2 + 0.1*X3 + eps
 ydum <- ifelse(Y > mean(Y),1,0)
 mydata <- cbind(Y,ydum,X1,X2,X3,eps)
 ```
-## Exercise 2: ---
-###Correlation between Y and X1
+### Exercise 2: ---
+#### Correlation between Y and X1
 ```{r}
 cor(Y,X1)
 ```
 The correlation is limited from -1 to 1, so only thing we can tell is that there is a strong positive correlation between these two variables, which match the fact that the coef on X1 is possitive.
 
-### Regression of Y on X where X = (1,X1,X2,X3) (Mannually)
+#### Regression of Y on X where X = (1,X1,X2,X3) (Mannually)
 ```{r}
 ols <- function(X,y,se=F){
   n <- nrow(X)
@@ -51,12 +51,12 @@ y <- as.matrix(Y)
 ols.result <- ols(X,y,se=T)
 ols.result
 ```
-### Check with lm function
+#### Check with lm function
 ```{r}
 lm.result <- lm(Y~X1+X2+X3, data.frame(mydata))
 coef(summary(lm.result))[,c(1,2)] #coefficient & standard error
 ```
-### Boodstrap mannually
+#### Boodstrap mannually
 ```{r message=FALSE, warning=FALSE, paged.print=FALSE}
 bootstrapse <- function(n){
   # Input times of bootstrap
@@ -78,8 +78,8 @@ boot.se_499 <- bootstrapse(499)
 boot.se_49
 boot.se_499
 ```
-##Exercise 3: ---
-### likelihood function
+### Exercise 3: ---
+#### likelihood function
 ```{r}
 probit.llike <- function(b. = b, y. = ydum,X. = X){
   phi <- pnorm(X.%*%b.)
@@ -90,17 +90,17 @@ probit.llike <- function(b. = b, y. = ydum,X. = X){
   return(f)
 }
 ```
-### Optimizer using steepest ascent
+#### Optimizer using steepest descent
 By input a inial guess of parameter, relative stopping criteria (percentage change in function), and function, using gradient decent method featuring backtracking line search, you can get the parameter that minimize the funtion. Note: First arguement of fun. must be the parameter you want to get, X and y must be set into the default value.
 ```{r}
-graddec <- function(b,stop,fun){
+graddes <- function(b,stop,fun){
   d <- 0.001 # delta in the finite difference method
   alpha <- 0.1 # any initial alpha
   delta <- Inf
   while (delta > stop){
     # Calculate gradient for each regressor by Finite Difference Method
-    b. <- matrix(b,length(b),4)
-    g <- (apply(b. + diag(d,4),2,fun)-apply(b.,2,fun))/d
+    b. <- matrix(b,length(b),length(b))
+    g <- (apply(b. + diag(d,length(b)),2,fun)-apply(b.,2,fun))/d
     # Backtracking (Armijo–Goldstein condition tests to make sure the size of alpha)
     if(fun(b - alpha*g)>fun(b)-0.1*alpha*t(g)%*%g){
       alpha <- 0.5*alpha
@@ -114,20 +114,20 @@ graddec <- function(b,stop,fun){
   }
   return(b)
 }
-result.gd <- graddec(c(0,0,0,0),1e-5,probit.llike)
+result.gd <- graddes(c(0,0,0,0),1e-5,probit.llike)
 result.gd
 ```
-### Except the coefficient on constant, others are close, but still have a big difference.
+Except the coefficient on constant, others are close, but still have a big difference.
 
-## Exercise 4 ----
-### Optimize Probit
+### Exercise 4 ----
+#### Optimize Probit
 ```{r}
 b.p <- c(0,0,0,0)
 result.p <- optim(par = b.p, probit.llike)
 result.p$par
 ```
 
-### Optimizing Logit
+#### Optimizing Logit
 ```{r}
 logit.llike <- function(b., y. = ydum,X. = X){
   gamma <- exp(X.%*%b.)/(1+exp(X.%*%b.))
@@ -139,12 +139,12 @@ b.l <- c(0,0,0,0)
 result.l <- optim(par = b.l, logit.llike)
 result.l$par
 ```
-### Optimizing Linear Probability
+#### Optimizing Linear Probability
 ```{r}
 result.lp <- lm(ydum~X1+X2+X3)
 summary(result.lp)
 ```
-### Check significance with glm function
+#### Check significance with glm function
 ```{r message=FALSE, warning=FALSE}
 result.p.glm <- glm(ydum ~ X1 + X2 + X3, family = binomial(link = "probit"), 
                 data = data.frame(mydata))
@@ -156,19 +156,19 @@ coef(summary(result.l.glm))
 ```
 The coefficient varies largely across these three methods, but the sign on the coefficients are the same, and all X3 coefs are not significant.For Probit and logit, without calcuating the marginal effect, we can only interprete the sign. Higher X2 can decrease the probability of ydum = 1, which means higher X2 is likely to generate Y below mean. Higher X1 and X3 can increase the probability of ydum = 1, which means that higher X1 and X3 is likely to genrate Y above mean. This mathch the sign in the data generating process. For linear probability model, X1: one unit increase in X1 likely to increase the likelihood of ydum = 1 by 14%; X2: one unit increase in X2 likely to decrease the likelihood of ydum = 1 by 10%; X3: one unit increase in X3 likely to increase the likelihood of ydum = 1 by 1%
 
-## Exercise 5 ---
-### Compute Average Marginal Effect (AME) of X of probit
+### Exercise 5 ---
+#### Compute Average Marginal Effect (AME) of X of probit
 ```{r}
 AME.p <- function(result) mean(dnorm(X%*%result))*result # result are the parameters
 AME.p(coef(result.p.glm))
 ```
-### Compute Average Margeinal Effect of X of Logit
+#### Compute Average Margeinal Effect of X of Logit
 ```{r}
 AME.l <- function(result) mean(dlogis(X%*%result))*result
 AME.l(coef(result.l.glm))
 ```
 Comment: Except the constant term, both models' average marginal effects are close to linear probability
-### Compute the Standard Error by delta method (Probit)
+#### Compute the Standard Error by delta method (Probit)
 Using num derivative function to simplfy the calualtion
 ```{r}
 # install.packages("numDeriv")
@@ -179,14 +179,14 @@ cov_matrixv <- vcov(result.p.glm)
 se.p <- sqrt(diag(gradient%*%cov_matrixv%*%t(gradient)))
 se.p
 ```
-### Compute the Standard Error by delta method (Logit)
+#### Compute the Standard Error by delta method (Logit)
 ```{r}
 gradient <- jacobian(AME.l, coef(result.l.glm))
 cov_matrixv <- vcov(result.l.glm)
 se.l <- sqrt(diag(gradient%*%cov_matrixv%*%t(gradient)))
 se.l
 ```
-Compute the SE of AME by Bootstrap (Probit and Logit)
+#### Compute the SE of AME by Bootstrap (Probit and Logit)
 ```{r message=FALSE, warning=FALSE, paged.print=FALSE}
 bootstrapse2 <- function(n,l){
   # input bootstrap times and type of link function
