@@ -1,0 +1,569 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={HW2},
+            pdfauthor={Jie Ren},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{HW2}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Jie Ren}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{February 8, 2019}
+
+
+\begin{document}
+\maketitle
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{rm}\NormalTok{(}\DataTypeTok{list=}\KeywordTok{ls}\NormalTok{())}
+\KeywordTok{setwd}\NormalTok{(}\StringTok{"C:/Users/jiere/Dropbox/Spring 2019/ECON 613/ECON613_HW"}\NormalTok{)}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{100}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Exercise 1: Data generation
+---}\label{exercise-1-data-generation}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{obs <-}\StringTok{ }\DecValTok{10000}
+\NormalTok{X1 <-}\StringTok{ }\KeywordTok{runif}\NormalTok{(obs, }\DataTypeTok{max =} \DecValTok{3}\NormalTok{, }\DataTypeTok{min =} \DecValTok{1}\NormalTok{)}
+\NormalTok{X2 <-}\StringTok{ }\KeywordTok{rgamma}\NormalTok{(obs,}\DecValTok{3}\NormalTok{,}\DataTypeTok{scale =} \DecValTok{2}\NormalTok{)}
+\NormalTok{X3 <-}\StringTok{ }\KeywordTok{rbinom}\NormalTok{(obs,}\DecValTok{1}\NormalTok{,}\FloatTok{0.3}\NormalTok{)}
+\NormalTok{eps <-}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(obs, }\DataTypeTok{mean =} \DecValTok{2}\NormalTok{, }\DataTypeTok{sd =} \DecValTok{1}\NormalTok{)}
+\NormalTok{Y <-}\StringTok{ }\FloatTok{0.5} \OperatorTok{+}\StringTok{ }\FloatTok{1.2}\OperatorTok{*}\NormalTok{X1 }\OperatorTok{-}\StringTok{ }\FloatTok{0.9}\OperatorTok{*}\NormalTok{X2 }\OperatorTok{+}\StringTok{ }\FloatTok{0.1}\OperatorTok{*}\NormalTok{X3 }\OperatorTok{+}\StringTok{ }\NormalTok{eps}
+\NormalTok{ydum <-}\StringTok{ }\KeywordTok{ifelse}\NormalTok{(Y }\OperatorTok{>}\StringTok{ }\KeywordTok{mean}\NormalTok{(Y),}\DecValTok{1}\NormalTok{,}\DecValTok{0}\NormalTok{)}
+\NormalTok{mydata <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(Y,ydum,X1,X2,X3,eps)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Exercise 2: ---}\label{exercise-2}
+
+\subsubsection{Correlation between Y and
+X1}\label{correlation-between-y-and-x1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cor}\NormalTok{(Y,X1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.2162074
+\end{verbatim}
+
+The correlation is limited from -1 to 1, so only thing we can tell is
+that there is a strong positive correlation between these two variables,
+which match the fact that the coef on X1 is possitive.
+
+\subsubsection{Regression of Y on X where X = (1,X1,X2,X3)
+(Mannually)}\label{regression-of-y-on-x-where-x-1x1x2x3-mannually}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ols <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(X,y,}\DataTypeTok{se=}\NormalTok{F)\{}
+\NormalTok{  n <-}\StringTok{ }\KeywordTok{nrow}\NormalTok{(X)}
+\NormalTok{  k <-}\StringTok{ }\KeywordTok{ncol}\NormalTok{(X)}
+\NormalTok{  ols.coef <-}\StringTok{ }\KeywordTok{solve}\NormalTok{(}\KeywordTok{t}\NormalTok{(X)}\OperatorTok{%*%}\NormalTok{X)}\OperatorTok{%*%}\NormalTok{(}\KeywordTok{t}\NormalTok{(X)}\OperatorTok{%*%}\NormalTok{y) }\CommentTok{#coefficient}
+\NormalTok{  ols.res <-}\StringTok{ }\NormalTok{(y}\OperatorTok{-}\NormalTok{X}\OperatorTok{%*%}\NormalTok{ols.coef) }\CommentTok{# residual}
+\NormalTok{  ols.V <-}\StringTok{ }\DecValTok{1}\OperatorTok{/}\NormalTok{(n}\OperatorTok{-}\NormalTok{k) }\OperatorTok{*}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{t}\NormalTok{(ols.res)}\OperatorTok{%*%}\NormalTok{ols.res)}\OperatorTok{*}\KeywordTok{solve}\NormalTok{(}\KeywordTok{t}\NormalTok{(X)}\OperatorTok{%*%}\NormalTok{X) }\CommentTok{#covariance matrix}
+\NormalTok{  ols.se <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{diag}\NormalTok{(ols.V))) }\CommentTok{#standard error}
+  \KeywordTok{ifelse}\NormalTok{(se }\OperatorTok{==}\StringTok{ }\NormalTok{T, }\KeywordTok{return}\NormalTok{(}\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{b_hat =}\NormalTok{ ols.coef,}\DataTypeTok{se =}\NormalTok{ ols.se)),}\KeywordTok{return}\NormalTok{(}\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{b_hat =}\NormalTok{ ols.coef))) }\CommentTok{# output coef only by default}
+\NormalTok{\}}
+
+\NormalTok{X <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(}\DecValTok{1}\NormalTok{,X1,X2,X3)}
+\NormalTok{y <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(Y)}
+\NormalTok{ols.result <-}\StringTok{ }\KeywordTok{ols}\NormalTok{(X,y,}\DataTypeTok{se=}\NormalTok{T)}
+\NormalTok{ols.result}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##         b_hat          se
+##     2.4561034 0.040982313
+## X1  1.2158000 0.017491090
+## X2 -0.8984434 0.002952839
+## X3  0.1018762 0.022040052
+\end{verbatim}
+
+\subsubsection{Check with lm function}\label{check-with-lm-function}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lm.result <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(Y}\OperatorTok{~}\NormalTok{X1}\OperatorTok{+}\NormalTok{X2}\OperatorTok{+}\NormalTok{X3, }\KeywordTok{data.frame}\NormalTok{(mydata))}
+\KeywordTok{coef}\NormalTok{(}\KeywordTok{summary}\NormalTok{(lm.result))[,}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{)] }\CommentTok{#coefficient & standard error}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##               Estimate  Std. Error
+## (Intercept)  2.4561034 0.040982313
+## X1           1.2158000 0.017491090
+## X2          -0.8984434 0.002952839
+## X3           0.1018762 0.022040052
+\end{verbatim}
+
+\subsubsection{Boodstrap mannually}\label{boodstrap-mannually}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bootstrapse <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(n)\{}
+  \CommentTok{# Input times of bootstrap}
+\NormalTok{  boot.coef <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{matrix}\NormalTok{(}\DataTypeTok{nrow=}\DecValTok{4}\NormalTok{, }\DataTypeTok{ncol=}\DecValTok{1}\NormalTok{))[}\OperatorTok{-}\DecValTok{1}\NormalTok{]}
+  \ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{n) \{}
+    \CommentTok{# sample from existing data to get X.s, y.s}
+\NormalTok{    df.s <-}\StringTok{ }\NormalTok{mydata[}\KeywordTok{sample}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(mydata),}\DataTypeTok{size =} \KeywordTok{nrow}\NormalTok{(mydata),}\DataTypeTok{replace =}\NormalTok{ T),]}
+\NormalTok{    y.s <-}\StringTok{ }\NormalTok{df.s[,}\DecValTok{1}\NormalTok{]}
+\NormalTok{    X.s <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(}\DecValTok{1}\NormalTok{,df.s[,}\KeywordTok{c}\NormalTok{(}\DecValTok{3}\OperatorTok{:}\DecValTok{5}\NormalTok{)])}
+    \CommentTok{# calculate ols coefficient in each sample}
+\NormalTok{    boot.coef <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(boot.coef,}\KeywordTok{ols}\NormalTok{(X.s,y.s))}
+\NormalTok{  \}}
+  \CommentTok{# Report the SE over all the obtained coefficients}
+  \KeywordTok{return}\NormalTok{(}\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{se =} \KeywordTok{apply}\NormalTok{(boot.coef,}\DecValTok{1}\NormalTok{,sd)))}
+\NormalTok{\}}
+
+\NormalTok{boot.se_}\DecValTok{49}\NormalTok{ <-}\StringTok{ }\KeywordTok{bootstrapse}\NormalTok{(}\DecValTok{49}\NormalTok{)}
+\NormalTok{boot.se_}\DecValTok{499}\NormalTok{ <-}\StringTok{ }\KeywordTok{bootstrapse}\NormalTok{(}\DecValTok{499}\NormalTok{)}
+\NormalTok{boot.se_}\DecValTok{49}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##             se
+##    0.038829998
+## X1 0.018566206
+## X2 0.003008488
+## X3 0.021760076
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{boot.se_}\DecValTok{499}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##            se
+##    0.03734032
+## X1 0.01666233
+## X2 0.00292241
+## X3 0.02206388
+\end{verbatim}
+
+\subsection{Exercise 3: ---}\label{exercise-3}
+
+\subsubsection{likelihood function}\label{likelihood-function}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{probit.llike <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(}\DataTypeTok{b. =}\NormalTok{ b, }\DataTypeTok{y. =}\NormalTok{ ydum,}\DataTypeTok{X. =}\NormalTok{ X)\{}
+\NormalTok{  phi <-}\StringTok{ }\KeywordTok{pnorm}\NormalTok{(X.}\OperatorTok{%*%}\NormalTok{b.)}
+\NormalTok{  phi[phi}\OperatorTok{==}\DecValTok{1}\NormalTok{] <-}\StringTok{ }\FloatTok{0.9999} \CommentTok{# avoid NaN of log function}
+\NormalTok{  phi[phi}\OperatorTok{==}\DecValTok{0}\NormalTok{] <-}\StringTok{ }\FloatTok{0.0001}
+\NormalTok{  f <-}\StringTok{ }\KeywordTok{sum}\NormalTok{(y.}\OperatorTok{*}\KeywordTok{log}\NormalTok{(phi))}\OperatorTok{+}\KeywordTok{sum}\NormalTok{((}\DecValTok{1}\OperatorTok{-}\NormalTok{y.)}\OperatorTok{*}\KeywordTok{log}\NormalTok{(}\DecValTok{1}\OperatorTok{-}\NormalTok{phi))}
+\NormalTok{  f <-}\StringTok{ }\OperatorTok{-}\NormalTok{f}
+  \KeywordTok{return}\NormalTok{(f)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\subsubsection{Optimizer using steepest
+ascent}\label{optimizer-using-steepest-ascent}
+
+By input a inial guess of parameter, relative stopping criteria
+(percentage change in function), and function, using gradient decent
+method featuring backtracking line search, you can get the parameter
+that minimize the funtion. Note: First arguement of fun. must be the
+parameter you want to get, X and y must be set into the default value.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{graddec <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(b,stop,fun)\{}
+\NormalTok{  d <-}\StringTok{ }\FloatTok{0.001} \CommentTok{# delta in the finite difference method}
+\NormalTok{  alpha <-}\StringTok{ }\FloatTok{0.1} \CommentTok{# any initial alpha}
+\NormalTok{  delta <-}\StringTok{ }\OtherTok{Inf}
+  \ControlFlowTok{while}\NormalTok{ (delta }\OperatorTok{>}\StringTok{ }\NormalTok{stop)\{}
+    \CommentTok{# Calculate gradient for each regressor by Finite Difference Method}
+\NormalTok{    b. <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(b,}\KeywordTok{length}\NormalTok{(b),}\DecValTok{4}\NormalTok{)}
+\NormalTok{    g <-}\StringTok{ }\NormalTok{(}\KeywordTok{apply}\NormalTok{(b. }\OperatorTok{+}\StringTok{ }\KeywordTok{diag}\NormalTok{(d,}\DecValTok{4}\NormalTok{),}\DecValTok{2}\NormalTok{,fun)}\OperatorTok{-}\KeywordTok{apply}\NormalTok{(b.,}\DecValTok{2}\NormalTok{,fun))}\OperatorTok{/}\NormalTok{d}
+    \CommentTok{# Backtracking (Armijo–Goldstein condition tests to make sure the size of alpha)}
+    \ControlFlowTok{if}\NormalTok{(}\KeywordTok{fun}\NormalTok{(b }\OperatorTok{-}\StringTok{ }\NormalTok{alpha}\OperatorTok{*}\NormalTok{g)}\OperatorTok{>}\KeywordTok{fun}\NormalTok{(b)}\OperatorTok{-}\FloatTok{0.1}\OperatorTok{*}\NormalTok{alpha}\OperatorTok{*}\KeywordTok{t}\NormalTok{(g)}\OperatorTok{%*%}\NormalTok{g)\{}
+\NormalTok{      alpha <-}\StringTok{ }\FloatTok{0.5}\OperatorTok{*}\NormalTok{alpha}
+      \ControlFlowTok{next}
+\NormalTok{    \}}
+    \CommentTok{# Make step forward (t+1) and saved in bn}
+\NormalTok{    bn <-}\StringTok{ }\NormalTok{b }\OperatorTok{-}\StringTok{ }\NormalTok{alpha}\OperatorTok{*}\NormalTok{g }
+    \CommentTok{# Stopping Criteria }
+\NormalTok{    delta <-}\StringTok{ }\NormalTok{(}\KeywordTok{abs}\NormalTok{(}\KeywordTok{fun}\NormalTok{(bn)}\OperatorTok{-}\KeywordTok{fun}\NormalTok{(b))}\OperatorTok{/}\KeywordTok{abs}\NormalTok{(}\KeywordTok{fun}\NormalTok{(b)))}
+\NormalTok{    b <-}\StringTok{ }\NormalTok{bn}
+\NormalTok{  \}}
+  \KeywordTok{return}\NormalTok{(b)}
+\NormalTok{\}}
+\NormalTok{result.gd <-}\StringTok{ }\KeywordTok{graddec}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{),}\FloatTok{1e-5}\NormalTok{,probit.llike)}
+\NormalTok{result.gd}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]  2.2900259  1.3625441 -0.8485096  0.0949513
+\end{verbatim}
+
+\subsubsection{Except the coefficient on constant, others are close, but
+still have a big
+difference.}\label{except-the-coefficient-on-constant-others-are-close-but-still-have-a-big-difference.}
+
+\subsection{Exercise 4 ----}\label{exercise-4--}
+
+\subsubsection{Optimize Probit}\label{optimize-probit}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{b.p <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{)}
+\NormalTok{result.p <-}\StringTok{ }\KeywordTok{optim}\NormalTok{(}\DataTypeTok{par =}\NormalTok{ b.p, probit.llike)}
+\NormalTok{result.p}\OperatorTok{$}\NormalTok{par}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]  2.81623688  1.23884124 -0.89197772  0.04781058
+\end{verbatim}
+
+\subsubsection{Optimizing Logit}\label{optimizing-logit}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{logit.llike <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(b., }\DataTypeTok{y. =}\NormalTok{ ydum,}\DataTypeTok{X. =}\NormalTok{ X)\{}
+\NormalTok{  gamma <-}\StringTok{ }\KeywordTok{exp}\NormalTok{(X.}\OperatorTok{%*%}\NormalTok{b.)}\OperatorTok{/}\NormalTok{(}\DecValTok{1}\OperatorTok{+}\KeywordTok{exp}\NormalTok{(X.}\OperatorTok{%*%}\NormalTok{b.))}
+\NormalTok{  f <-}\StringTok{ }\KeywordTok{sum}\NormalTok{(y.}\OperatorTok{*}\KeywordTok{log}\NormalTok{(gamma))}\OperatorTok{+}\KeywordTok{sum}\NormalTok{((}\DecValTok{1}\OperatorTok{-}\NormalTok{y.)}\OperatorTok{*}\KeywordTok{log}\NormalTok{(}\DecValTok{1}\OperatorTok{-}\NormalTok{gamma))}
+\NormalTok{  f <-}\StringTok{ }\OperatorTok{-}\NormalTok{f}
+  \KeywordTok{return}\NormalTok{(f)}
+\NormalTok{\}}
+\NormalTok{b.l <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{)}
+\NormalTok{result.l <-}\StringTok{ }\KeywordTok{optim}\NormalTok{(}\DataTypeTok{par =}\NormalTok{ b.l, logit.llike)}
+\NormalTok{result.l}\OperatorTok{$}\NormalTok{par}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]  5.066553  2.231654 -1.606238  0.086059
+\end{verbatim}
+
+\subsubsection{Optimizing Linear
+Probability}\label{optimizing-linear-probability}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{result.lp <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(ydum}\OperatorTok{~}\NormalTok{X1}\OperatorTok{+}\NormalTok{X2}\OperatorTok{+}\NormalTok{X3)}
+\KeywordTok{summary}\NormalTok{(result.lp)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = ydum ~ X1 + X2 + X3)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.90570 -0.26599  0.05805  0.24995  2.35722 
+## 
+## Coefficients:
+##               Estimate Std. Error  t value Pr(>|t|)    
+## (Intercept)  0.8795230  0.0134596   65.345   <2e-16 ***
+## X1           0.1520890  0.0057445   26.476   <2e-16 ***
+## X2          -0.1055427  0.0009698 -108.831   <2e-16 ***
+## X3           0.0105571  0.0072385    1.458    0.145    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.3305 on 9996 degrees of freedom
+## Multiple R-squared:  0.5571, Adjusted R-squared:  0.557 
+## F-statistic:  4191 on 3 and 9996 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+\subsubsection{Check significance with glm
+function}\label{check-significance-with-glm-function}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{result.p.glm <-}\StringTok{ }\KeywordTok{glm}\NormalTok{(ydum }\OperatorTok{~}\StringTok{ }\NormalTok{X1 }\OperatorTok{+}\StringTok{ }\NormalTok{X2 }\OperatorTok{+}\StringTok{ }\NormalTok{X3, }\DataTypeTok{family =} \KeywordTok{binomial}\NormalTok{(}\DataTypeTok{link =} \StringTok{"probit"}\NormalTok{), }
+                \DataTypeTok{data =} \KeywordTok{data.frame}\NormalTok{(mydata))}
+\KeywordTok{coef}\NormalTok{(}\KeywordTok{summary}\NormalTok{(result.p.glm))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                Estimate Std. Error    z value      Pr(>|z|)
+## (Intercept)  2.81677032 0.09725690  28.962164 1.972323e-184
+## X1           1.23905407 0.04413997  28.071019 2.213032e-173
+## X2          -0.89214080 0.01803881 -49.456742  0.000000e+00
+## X3           0.04803623 0.04686155   1.025067  3.053315e-01
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{result.l.glm <-}\StringTok{ }\KeywordTok{glm}\NormalTok{(ydum }\OperatorTok{~}\StringTok{ }\NormalTok{X1 }\OperatorTok{+}\StringTok{ }\NormalTok{X2 }\OperatorTok{+}\StringTok{ }\NormalTok{X3, }\DataTypeTok{family =} \KeywordTok{binomial}\NormalTok{(}\DataTypeTok{link =} \StringTok{"logit"}\NormalTok{), }
+                \DataTypeTok{data =} \KeywordTok{data.frame}\NormalTok{(mydata))}
+\KeywordTok{coef}\NormalTok{(}\KeywordTok{summary}\NormalTok{(result.l.glm))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                Estimate Std. Error    z value      Pr(>|z|)
+## (Intercept)  5.06601765 0.18221378  27.802605 4.034324e-170
+## X1           2.23093874 0.08251564  27.036555 5.496980e-161
+## X2          -1.60595037 0.03611664 -44.465664  0.000000e+00
+## X3           0.08672068 0.08425283   1.029291  3.033429e-01
+\end{verbatim}
+
+The coefficient varies largely across these three methods, but the sign
+on the coefficients are the same, and all X3 coefs are not
+significant.For Probit and logit, without calcuating the marginal
+effect, we can only interprete the sign. Higher X2 can decrease the
+probability of ydum = 1, which means higher X2 is likely to generate Y
+below mean. Higher X1 and X3 can increase the probability of ydum = 1,
+which means that higher X1 and X3 is likely to genrate Y above mean.
+This mathch the sign in the data generating process. For linear
+probability model, X1: one unit increase in X1 likely to increase the
+likelihood of ydum = 1 by 14\%; X2: one unit increase in X2 likely to
+decrease the likelihood of ydum = 1 by 10\%; X3: one unit increase in X3
+likely to increase the likelihood of ydum = 1 by 1\%
+
+\subsection{Exercise 5 ---}\label{exercise-5}
+
+\subsubsection{Compute Average Marginal Effect (AME) of X of
+probit}\label{compute-average-marginal-effect-ame-of-x-of-probit}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{AME.p <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(result) }\KeywordTok{mean}\NormalTok{(}\KeywordTok{dnorm}\NormalTok{(X}\OperatorTok{%*%}\NormalTok{result))}\OperatorTok{*}\NormalTok{result }\CommentTok{# result are the parameters}
+\KeywordTok{AME.p}\NormalTok{(}\KeywordTok{coef}\NormalTok{(result.p.glm))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  (Intercept)           X1           X2           X3 
+##  0.342005585  0.150443012 -0.108321625  0.005832446
+\end{verbatim}
+
+\subsubsection{Compute Average Margeinal Effect of X of
+Logit}\label{compute-average-margeinal-effect-of-x-of-logit}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{AME.l <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(result) }\KeywordTok{mean}\NormalTok{(}\KeywordTok{dlogis}\NormalTok{(X}\OperatorTok{%*%}\NormalTok{result))}\OperatorTok{*}\NormalTok{result}
+\KeywordTok{AME.l}\NormalTok{(}\KeywordTok{coef}\NormalTok{(result.l.glm))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  (Intercept)           X1           X2           X3 
+##  0.340761837  0.150062404 -0.108023034  0.005833201
+\end{verbatim}
+
+Comment: Except the constant term, both models' average marginal effects
+are close to linear probability \#\#\# Compute the Standard Error by
+delta method (Probit) Using num derivative function to simplfy the
+calualtion
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# install.packages("numDeriv")}
+\KeywordTok{library}\NormalTok{(}\StringTok{"numDeriv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'numDeriv' was built under R version 3.5.2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{gradient <-}\StringTok{ }\KeywordTok{jacobian}\NormalTok{(AME.p, }\KeywordTok{coef}\NormalTok{(result.p.glm))}
+\NormalTok{cov_matrixv <-}\StringTok{ }\KeywordTok{vcov}\NormalTok{(result.p.glm)}
+\NormalTok{se.p <-}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{diag}\NormalTok{(gradient}\OperatorTok{%*%}\NormalTok{cov_matrixv}\OperatorTok{%*%}\KeywordTok{t}\NormalTok{(gradient)))}
+\NormalTok{se.p}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.0096251550 0.0044537875 0.0003841457 0.0056888459
+\end{verbatim}
+
+\subsubsection{Compute the Standard Error by delta method
+(Logit)}\label{compute-the-standard-error-by-delta-method-logit}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{gradient <-}\StringTok{ }\KeywordTok{jacobian}\NormalTok{(AME.l, }\KeywordTok{coef}\NormalTok{(result.l.glm))}
+\NormalTok{cov_matrixv <-}\StringTok{ }\KeywordTok{vcov}\NormalTok{(result.l.glm)}
+\NormalTok{se.l <-}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{diag}\NormalTok{(gradient}\OperatorTok{%*%}\NormalTok{cov_matrixv}\OperatorTok{%*%}\KeywordTok{t}\NormalTok{(gradient)))}
+\NormalTok{se.l}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.0095907416 0.0044580591 0.0003751031 0.0056660253
+\end{verbatim}
+
+Compute the SE of AME by Bootstrap (Probit and Logit)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bootstrapse2 <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(n,l)\{}
+  \CommentTok{# input bootstrap times and type of link function}
+\NormalTok{  boot.me <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{matrix}\NormalTok{(}\DataTypeTok{nrow=}\DecValTok{4}\NormalTok{, }\DataTypeTok{ncol=}\DecValTok{1}\NormalTok{))[}\OperatorTok{-}\DecValTok{1}\NormalTok{]}
+  \ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{n) \{}
+    \CommentTok{# sample from existing data to get X.s, y.s}
+\NormalTok{    df.s <-}\StringTok{ }\NormalTok{mydata[}\KeywordTok{sample}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(mydata),}\DataTypeTok{size =} \KeywordTok{nrow}\NormalTok{(mydata),}\DataTypeTok{replace =}\NormalTok{ T),]}
+\NormalTok{    result <-}\StringTok{ }\KeywordTok{glm}\NormalTok{(ydum }\OperatorTok{~}\StringTok{ }\NormalTok{X1 }\OperatorTok{+}\StringTok{ }\NormalTok{X2 }\OperatorTok{+}\StringTok{ }\NormalTok{X3, }\DataTypeTok{family=}\KeywordTok{binomial}\NormalTok{(}\DataTypeTok{link =}\NormalTok{ l),}\KeywordTok{data.frame}\NormalTok{(df.s))}
+    \CommentTok{# calculate ols coefficient in each sample}
+\NormalTok{    me <-}\StringTok{ }\KeywordTok{mean}\NormalTok{(}\KeywordTok{dnorm}\NormalTok{(}\KeywordTok{predict.glm}\NormalTok{(result, }\DataTypeTok{type =} \StringTok{"link"}\NormalTok{)))}\OperatorTok{*}\KeywordTok{coef}\NormalTok{(result)}
+\NormalTok{    boot.me <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(boot.me,me)}
+\NormalTok{  \}}
+  \CommentTok{# Report the SE over all the obtained coefficients}
+  \KeywordTok{return}\NormalTok{(}\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{se =} \KeywordTok{apply}\NormalTok{(boot.me,}\DecValTok{1}\NormalTok{,sd)))}
+\NormalTok{\}}
+\KeywordTok{bootstrapse2}\NormalTok{(}\DecValTok{49}\NormalTok{,}\StringTok{"probit"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                      se
+## (Intercept) 0.010730568
+## X1          0.004796591
+## X2          0.001396285
+## X3          0.005351611
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{bootstrapse2}\NormalTok{(}\DecValTok{49}\NormalTok{,}\StringTok{"logit"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                      se
+## (Intercept) 0.012499986
+## X1          0.005756487
+## X2          0.001994418
+## X3          0.005185732
+\end{verbatim}
+
+
+\end{document}
