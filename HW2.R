@@ -71,7 +71,7 @@ probit.llike <- function(b. = b, y. = ydum,X. = X){
   return(f)
 }
 
-# Optimizer using steepest ascent
+# Optimizer using steepest descent
 graddec <- function(b,stop,fun){
   # By input a inial guess of parameter, relative stopping criteria (percentage change in function), and function, 
   # using gradient decent method featuring backtracking line search, you can get the parameter that
