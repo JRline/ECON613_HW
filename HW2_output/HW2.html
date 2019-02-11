@@ -209,7 +209,7 @@ mydata &lt;- cbind(Y,ydum,X1,X2,X3,eps)</code></pre>
 <div id="correlation-between-y-and-x1" class="section level4">
 <h4>Correlation between Y and X1</h4>
 <pre class="r"><code>cor(Y,X1)</code></pre>
-<pre><code>## [1] 0.2328937</code></pre>
+<pre><code>## [1] 0.1958912</code></pre>
 <p>The correlation is limited from -1 to 1, so only thing we can tell is that there is a strong positive correlation between these two variables, which match the fact that the coef on X1 is possitive.</p>
 </div>
 <div id="regression-of-y-on-x-where-x-1x1x2x3-mannually" class="section level4">
@@ -228,21 +228,21 @@ X &lt;- cbind(1,X1,X2,X3)
 y &lt;- as.matrix(Y)
 ols.result &lt;- ols(X,y,se=T)
 ols.result</code></pre>
-<pre><code>##         b_hat          se
-##     2.5460199 0.040550085
-## X1  1.1834457 0.017186332
-## X2 -0.9024293 0.002884213
-## X3  0.1029009 0.021602528</code></pre>
+<pre><code>##          b_hat          se
+##     2.52234245 0.039848496
+## X1  1.20119857 0.017153023
+## X2 -0.89969784 0.002845706
+## X3  0.04979379 0.021575295</code></pre>
 </div>
 <div id="check-with-lm-function" class="section level4">
 <h4>Check with lm function</h4>
 <pre class="r"><code>lm.result &lt;- lm(Y~X1+X2+X3, data.frame(mydata))
 coef(summary(lm.result))[,c(1,2)] #coefficient &amp; standard error</code></pre>
-<pre><code>##               Estimate  Std. Error
-## (Intercept)  2.5460199 0.040550085
-## X1           1.1834457 0.017186332
-## X2          -0.9024293 0.002884213
-## X3           0.1029009 0.021602528</code></pre>
+<pre><code>##                Estimate  Std. Error
+## (Intercept)  2.52234245 0.039848496
+## X1           1.20119857 0.017153023
+## X2          -0.89969784 0.002845706
+## X3           0.04979379 0.021575295</code></pre>
 </div>
 <div id="boodstrap-mannually" class="section level4">
 <h4>Boodstrap mannually</h4>
@@ -265,16 +265,16 @@ boot.se_49 &lt;- bootstrapse(49)
 boot.se_499 &lt;- bootstrapse(499)
 boot.se_49</code></pre>
 <pre><code>##             se
-##    0.038431366
-## X1 0.017368822
-## X2 0.002526233
-## X3 0.020378681</code></pre>
+##    0.034100474
+## X1 0.015908183
+## X2 0.003011291
+## X3 0.021915225</code></pre>
 <pre class="r"><code>boot.se_499</code></pre>
 <pre><code>##             se
-##    0.038580433
-## X1 0.016716620
-## X2 0.002727123
-## X3 0.021307475</code></pre>
+##    0.038402885
+## X1 0.016789935
+## X2 0.002792234
+## X3 0.021461798</code></pre>
 </div>
 </div>
 <div id="exercise-3" class="section level3">
@@ -316,7 +316,7 @@ boot.se_49</code></pre>
 }
 result.gd &lt;- graddes(c(0,0,0,0),1e-5,probit.llike)
 result.gd</code></pre>
-<pre><code>## [1]  2.43429217  1.24814419 -0.82386599  0.07045064</code></pre>
+<pre><code>## [1]  2.4609970  1.3016676 -0.8484962  0.1108055</code></pre>
 <p>Except the coefficient on constant, others are close, but still have a big difference.</p>
 </div>
 </div>
@@ -327,7 +327,7 @@ result.gd</code></pre>
 <pre class="r"><code>b.p &lt;- c(0,0,0,0)
 result.p &lt;- optim(par = b.p, probit.llike)
 result.p$par</code></pre>
-<pre><code>## [1]  2.9692419  1.1286860 -0.8700527  0.0223277</code></pre>
+<pre><code>## [1]  3.0056228  1.1923931 -0.8992393  0.0642602</code></pre>
 </div>
 <div id="optimizing-logit" class="section level4">
 <h4>Optimizing Logit</h4>
@@ -340,7 +340,7 @@ result.p$par</code></pre>
 b.l &lt;- c(0,0,0,0)
 result.l &lt;- optim(par = b.l, logit.llike)
 result.l$par</code></pre>
-<pre><code>## [1]  5.35469263  2.03189926 -1.56647767  0.09187813</code></pre>
+<pre><code>## [1]  5.3337025  2.1429528 -1.6042791  0.1037592</code></pre>
 </div>
 <div id="optimizing-linear-probability" class="section level4">
 <h4>Optimizing Linear Probability</h4>
@@ -352,39 +352,39 @@ summary(result.lp)</code></pre>
 ## 
 ## Residuals:
 ##      Min       1Q   Median       3Q      Max 
-## -0.96139 -0.26100  0.05513  0.24640  1.59501 
+## -0.89446 -0.27397  0.05613  0.25112  1.67368 
 ## 
 ## Coefficients:
 ##               Estimate Std. Error  t value Pr(&gt;|t|)    
-## (Intercept)  0.9134012  0.0135241   67.539   &lt;2e-16 ***
-## X1           0.1390353  0.0057319   24.256   &lt;2e-16 ***
-## X2          -0.1046010  0.0009619 -108.741   &lt;2e-16 ***
-## X3          -0.0022531  0.0072048   -0.313    0.754    
+## (Intercept)  0.8862364  0.0134043   66.116   &lt;2e-16 ***
+## X1           0.1453517  0.0057699   25.191   &lt;2e-16 ***
+## X2          -0.1031835  0.0009572 -107.793   &lt;2e-16 ***
+## X3           0.0085905  0.0072575    1.184    0.237    
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
-## Residual standard error: 0.3299 on 9996 degrees of freedom
-## Multiple R-squared:  0.5575, Adjusted R-squared:  0.5573 
-## F-statistic:  4197 on 3 and 9996 DF,  p-value: &lt; 2.2e-16</code></pre>
+## Residual standard error: 0.3335 on 9996 degrees of freedom
+## Multiple R-squared:  0.5495, Adjusted R-squared:  0.5493 
+## F-statistic:  4064 on 3 and 9996 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 <div id="check-significance-with-glm-function" class="section level4">
 <h4>Check significance with glm function</h4>
 <pre class="r"><code>result.p.glm &lt;- glm(ydum ~ X1 + X2 + X3, family = binomial(link = &quot;probit&quot;), 
                 data = data.frame(mydata))
 coef(summary(result.p.glm))</code></pre>
-<pre><code>##                Estimate Std. Error     z value      Pr(&gt;|z|)
-## (Intercept)  2.96990667 0.09796310  30.3165854 6.930564e-202
-## X1           1.12864904 0.04252353  26.5417515 3.197852e-155
-## X2          -0.87013671 0.01758459 -49.4829106  0.000000e+00
-## X3           0.02205778 0.04674929   0.4718313  6.370472e-01</code></pre>
+<pre><code>##                Estimate Std. Error    z value      Pr(&gt;|z|)
+## (Intercept)  3.00491899 0.09914144  30.309413 8.615805e-202
+## X1           1.19249312 0.04343634  27.453814 6.256122e-166
+## X2          -0.89918590 0.01837122 -48.945357  0.000000e+00
+## X3           0.06424304 0.04656637   1.379602  1.677094e-01</code></pre>
 <pre class="r"><code>result.l.glm &lt;- glm(ydum ~ X1 + X2 + X3, family = binomial(link = &quot;logit&quot;), 
                 data = data.frame(mydata))
 coef(summary(result.l.glm))</code></pre>
-<pre><code>##                Estimate Std. Error     z value      Pr(&gt;|z|)
-## (Intercept)  5.32840847 0.18406704  28.9481951 2.956983e-184
-## X1           2.04057398 0.07911212  25.7934417 1.050427e-146
-## X2          -1.56689346 0.03524042 -44.4629665  0.000000e+00
-## X3           0.06132788 0.08439373   0.7266876  4.674173e-01</code></pre>
+<pre><code>##               Estimate Std. Error    z value      Pr(&gt;|z|)
+## (Intercept)  5.3318335 0.18453836  28.892820 1.469556e-183
+## X1           2.1444811 0.08056666  26.617475 4.261023e-156
+## X2          -1.6044198 0.03632288 -44.171051  0.000000e+00
+## X3           0.1039269 0.08342311   1.245781  2.128450e-01</code></pre>
 <p>The coefficient varies largely across these three methods, but the sign on the coefficients are the same, and all X3 coefs are not significant.For Probit and logit, without calcuating the marginal effect, we can only interprete the sign. Higher X2 can decrease the probability of ydum = 1, which means higher X2 is likely to generate Y below mean. Higher X1 and X3 can increase the probability of ydum = 1, which means that higher X1 and X3 is likely to genrate Y above mean. This mathch the sign in the data generating process. For linear probability model, X1: one unit increase in X1 likely to increase the likelihood of ydum = 1 by 14%; X2: one unit increase in X2 likely to decrease the likelihood of ydum = 1 by 10%; X3: one unit increase in X3 likely to increase the likelihood of ydum = 1 by 1%</p>
 </div>
 </div>
@@ -395,15 +395,19 @@ coef(summary(result.l.glm))</code></pre>
 <pre class="r"><code>AME.p &lt;- function(result) mean(dnorm(X%*%result))*result # result are the parameters
 AME.p(coef(result.p.glm))</code></pre>
 <pre><code>##  (Intercept)           X1           X2           X3 
-##  0.364166835  0.138393759 -0.106695249  0.002704702</code></pre>
+##  0.365181683  0.144921260 -0.109276231  0.007807326</code></pre>
 </div>
 <div id="compute-average-margeinal-effect-of-x-of-logit" class="section level4">
 <h4>Compute Average Margeinal Effect of X of Logit</h4>
 <pre class="r"><code>AME.l &lt;- function(result) mean(dlogis(X%*%result))*result
 AME.l(coef(result.l.glm))</code></pre>
 <pre><code>##  (Intercept)           X1           X2           X3 
-##  0.361545950  0.138458090 -0.106317672  0.004161251</code></pre>
-<p>Comment: Except the constant term, both models’ average marginal effects are close to linear probability #### Compute the Standard Error by delta method (Probit) Using num derivative function to simplfy the calualtion</p>
+##  0.362994821  0.145997718 -0.109229981  0.007075413</code></pre>
+<p>Comment: Except the constant term, both models’ average marginal effects are close to linear probability</p>
+</div>
+<div id="compute-the-standard-error-by-delta-method-probit" class="section level4">
+<h4>Compute the Standard Error by delta method (Probit)</h4>
+<p>Using num derivative function to simplfy the calualtion</p>
 <pre class="r"><code># install.packages(&quot;numDeriv&quot;)
 library(&quot;numDeriv&quot;)</code></pre>
 <pre><code>## Warning: package 'numDeriv' was built under R version 3.5.2</code></pre>
@@ -411,7 +415,7 @@ library(&quot;numDeriv&quot;)</code></pre>
 cov_matrixv &lt;- vcov(result.p.glm)
 se.p &lt;- sqrt(diag(gradient%*%cov_matrixv%*%t(gradient)))
 se.p</code></pre>
-<pre><code>## [1] 0.0095835753 0.0044418501 0.0004374578 0.0057322302</code></pre>
+<pre><code>## [1] 0.0095267568 0.0044046388 0.0003722534 0.0056571900</code></pre>
 </div>
 <div id="compute-the-standard-error-by-delta-method-logit" class="section level4">
 <h4>Compute the Standard Error by delta method (Logit)</h4>
@@ -419,7 +423,7 @@ se.p</code></pre>
 cov_matrixv &lt;- vcov(result.l.glm)
 se.l &lt;- sqrt(diag(gradient%*%cov_matrixv%*%t(gradient)))
 se.l</code></pre>
-<pre><code>## [1] 0.0095626045 0.0044177424 0.0004546654 0.0057260660</code></pre>
+<pre><code>## [1] 0.0095587095 0.0044171127 0.0003722124 0.0056775923</code></pre>
 </div>
 <div id="compute-the-se-of-ame-by-bootstrap-probit-and-logit" class="section level4">
 <h4>Compute the SE of AME by Bootstrap (Probit and Logit)</h4>
@@ -439,16 +443,16 @@ se.l</code></pre>
 }
 bootstrapse2(49,&quot;probit&quot;)</code></pre>
 <pre><code>##                      se
-## (Intercept) 0.010703144
-## X1          0.004591644
-## X2          0.001375785
-## X3          0.005809780</code></pre>
+## (Intercept) 0.008398829
+## X1          0.004956250
+## X2          0.001274618
+## X3          0.004437378</code></pre>
 <pre class="r"><code>bootstrapse2(49,&quot;logit&quot;)</code></pre>
 <pre><code>##                      se
-## (Intercept) 0.011787321
-## X1          0.004996584
-## X2          0.001531751
-## X3          0.006884090</code></pre>
+## (Intercept) 0.011916161
+## X1          0.005683564
+## X2          0.001965471
+## X3          0.006980426</code></pre>
 </div>
 </div>
 
