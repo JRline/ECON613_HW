@@ -123,12 +123,10 @@ result.lp <- lm(ydum~X1+X2+X3)
 summary(result.lp)
 
 # Check significance with glm function
-result.p.glm <- glm(ydum ~ X1 + X2 + X3, family = binomial(link = "probit"), 
-                data = data.frame(mydata))
+result.p.glm <- glm(ydum ~ X1 + X2 + X3, family = binomial(link = "probit"), data = data.frame(mydata))
 coef(summary(result.p.glm))
 
-result.l.glm <- glm(ydum ~ X1 + X2 + X3, family = binomial(link = "logit"), 
-                data = data.frame(mydata))
+result.l.glm <- glm(ydum ~ X1 + X2 + X3, family = binomial(link = "logit"), data = data.frame(mydata))
 coef(summary(result.l.glm))
 
 # The coefficient varies largely across these three methods, but the sign on the coefficients are the same, and all X3 coefs
