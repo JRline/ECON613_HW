@@ -92,7 +92,7 @@ probit.llike <- function(b. = b, y. = ydum,X. = X){
 }
 ```
 #### Optimizer using steepest descent
-First define a function to calcuate gradient/jacobian
+First define a function to calcuate gradient/jacobian by finite difference method
 ```{r}
 jacobian <- function(fun,par){
   d <- 1e-8
@@ -104,7 +104,6 @@ jacobian <- function(fun,par){
 By input a inial guess of parameter, relative stopping criteria (percentage change in function), and function, using gradient decent method featuring backtracking line search, you can get the parameter that minimize the funtion. Note: First arguement of fun. must be the parameter you want to get, X and y must be set into the default value.
 ```{r}
 graddes <- function(b,stop,fun){
-  d <- 1e-8 # delta in the finite difference method
   alpha <- 0.01 # any initial alpha
   delta <- Inf
   while (delta > stop){
@@ -139,7 +138,7 @@ result.p$par
 #### Optimizing Logit
 ```{r}
 logit.llike <- function(b., y. = ydum,X. = X){
-  gamma <- exp(X.%*%b.)/(1+exp(X.%*%b.))
+  gamma <- plogis(X%*%b.)
   f <- sum(y.*log(gamma))+sum((1-y.)*log(1-gamma))
   f <- -f
   return(f)
