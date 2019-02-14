@@ -84,7 +84,7 @@ boot.se_499
 X <- cbind(1,X1,X2,X3)
 y <- as.matrix(Y)
 
-probit.llike <- function(b. = b, y. = ydum,X. = X){
+probit.llike <- function(b., y. = ydum,X. = X){
   phi <- pnorm(X.%*%b.)
   phi[phi==1] <- 0.9999 # avoid NaN of log function
   phi[phi==0] <- 0.0001
@@ -132,8 +132,7 @@ Except the coefficient on constant, others are close, but still have a big diffe
 ### Exercise 4 ---
 #### Optimize Probit
 ```{r}
-b.p <- c(0,0,0,0)
-result.p <- optim(par = b.p, probit.llike)
+result.p <- optim(par = c(0,0,0,0), probit.llike)
 result.p$par
 ```
 
@@ -145,8 +144,7 @@ logit.llike <- function(b., y. = ydum,X. = X){
   f <- -f
   return(f)
 }
-b.l <- c(0,0,0,0)
-result.l <- optim(par = b.l, logit.llike)
+result.l <- optim(par = c(0,0,0,0), logit.llike)
 result.l$par
 ```
 #### Optimizing Linear Probability
@@ -168,43 +166,42 @@ The coefficient varies largely across these three methods, but the sign on the c
 
 ### Exercise 5 ---
 #### Compute Average Marginal Effect (AME) of X of probit
-```{r}
-AME.p <- function(result) mean(dnorm(X%*%result))*result # result are the parameters
-AME.p(coef(result.p.glm))
+```{r message=FALSE, warning=FALSE}
+probit.AME <- function(df){
+  result <- glm(ydum ~ X1 + X2 + X3, family=binomial(link = "probit"),df)
+  AME <- mean(dnorm(X%*%coef(result)))*coef(result)
+  return(AME)
+}
+probit.AME(mydata)
 ```
 #### Compute Average Margeinal Effect of X of Logit
-```{r}
-AME.l <- function(result) mean(dlogis(X%*%result))*result
-AME.l(coef(result.l.glm))
+```{r message=FALSE, warning=FALSE}
+logit.AME <- function(df){
+  result <- glm(ydum ~ X1 + X2 + X3, family=binomial(link = "logit"),df)
+  AME <- mean(dlogis(X%*%coef(result)))*coef(result)
+  return(AME)
+}
+logit.AME(mydata)
 ```
 Comment: Except the constant term, both models' average marginal effects are close to linear probability
 
 #### Compute the Standard Error of AME by delta method (Probit)
 ```{r warning=FALSE}
-J <- jacobian(AME.p, coef(result.p.glm)) # "jacobian" defined in EX3
+J <- jacobian(function(result) mean(dnorm(X%*%result))*result, coef(result.p.glm)) # "jacobian" defined in EX3
 cov_matrixv <- vcov(result.p.glm)
 se.p <- sqrt(diag(J%*%cov_matrixv%*%t(J)))
 se.p
 ```
 #### Compute the Standard Error of AME by delta method (Logit)
 ```{r}
-J <- jacobian(AME.l, coef(result.l.glm))
+J <- jacobian(function(result) mean(dlogis(X%*%result))*result, coef(result.l.glm))
 cov_matrixv <- vcov(result.l.glm)
 se.l <- sqrt(diag(J%*%cov_matrixv%*%t(J)))
 se.l
 ```
 #### Compute the SE of AME by Bootstrap (Probit and Logit)
 ```{r message=FALSE, warning=FALSE, paged.print=FALSE}
-# Write a function that can directly derive AME from dataframe
-probit.AME <- function(df){
-  result <- glm(ydum ~ X1 + X2 + X3, family=binomial(link = "probit"),df)
-  return(AME.p(coef(result)))
-}
-logit.AME <- function(df){
-  result <- glm(ydum ~ X1 + X2 + X3, family=binomial(link = "logit"),df)
-  return(AME.l(coef(result)))
-}
-# Plug in the prewrited "bootstrapese"
+# Plug in AME function to the prewrited "bootstrapese"
 bootstrapse(49,probit.AME)
 bootstrapse(49,logit.AME)
 ```
