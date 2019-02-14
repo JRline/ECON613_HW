@@ -1,5 +1,5 @@
 ---
-title: "HW2"
+title: "HW2 Result"
 author: "Jie Ren"
 date: "February 8, 2019"
 output:
@@ -26,18 +26,21 @@ X3 <- rbinom(obs,1,0.3)
 eps <- rnorm(obs, mean = 2, sd = 1)
 Y <- 0.5 + 1.2*X1 - 0.9*X2 + 0.1*X3 + eps
 ydum <- ifelse(Y > mean(Y),1,0)
-mydata <- cbind(Y,ydum,X1,X2,X3,eps)
+mydata <- data.frame(cbind(Y,ydum,X1,X2,X3,eps))
 ```
 ### Exercise 2: ---
 #### Correlation between Y and X1
 ```{r}
 cor(Y,X1)
 ```
-The correlation is limited from -1 to 1, so only thing we can tell is that there is a strong positive correlation between these two variables, which match the fact that the coef on X1 is possitive.
+The correlation is limited from -1 to 1, so only thing we can tell is that there is a strong positive correlation between these two variables, which match the fact that the coef on X1 is positive.
 
 #### Regression of Y on X where X = (1,X1,X2,X3) (Mannually)
 ```{r paged.print=FALSE}
-ols <- function(X,y,se=F){
+ols <- function(df,se=F){
+  # allow dataframe input
+  X <- as.matrix(cbind(1,df[,grep("X",colnames(df))]))
+  y <- df[,grep("Y",colnames(df))]
   n <- nrow(X)
   k <- ncol(X)
   ols.coef <- solve(t(X)%*%X)%*%(t(X)%*%y) #coefficient
@@ -47,41 +50,40 @@ ols <- function(X,y,se=F){
   ifelse(se == T, return(data.frame(b_hat = ols.coef,se = ols.se)),return(data.frame(b_hat = ols.coef))) # output coef only by default
 }
 
-X <- cbind(1,X1,X2,X3)
-y <- as.matrix(Y)
-ols.result <- ols(X,y,se=T)
+ols.result <- ols(mydata,se=T)
 ols.result
 ```
 #### Check with lm function
 ```{r}
-lm.result <- lm(Y~X1+X2+X3, data.frame(mydata))
+lm.result <- lm(Y~X1+X2+X3, mydata)
 coef(summary(lm.result))[,c(1,2)] #coefficient & standard error
 ```
 #### Boodstrap mannually
 ```{r message=FALSE, warning=FALSE, paged.print=FALSE}
-bootstrapse <- function(n){
+bootstrapse <- function(n,fun){
   # Input times of bootstrap
-  boot.coef <- data.frame(matrix(nrow=4, ncol=0))
+  boot.result <- data.frame(result = NA)[-1] # creating empty data frame
   for (i in 1:n) {
-    # sample from existing data to get X.s, y.s
+    # sample from existing data
     df.s <- mydata[sample(nrow(mydata),size = nrow(mydata),replace = T),]
-    y.s <- df.s[,1]
-    X.s <- cbind(1,df.s[,c(3:5)])
-    # calculate ols coefficient in each sample
-    boot.coef <- cbind(boot.coef,ols(X.s,y.s))
+    # calculate the result based on input function
+    boot.result <- cbind(boot.result,fun(df.s))
   }
-  # Report the SE over all the obtained coefficients
-  return(data.frame(se = apply(boot.coef,1,sd)))
+  # Report the SE over all the obtained result
+  return(data.frame(se = apply(boot.result,1,sd)))
 }
 
-boot.se_49 <- bootstrapse(49)
-boot.se_499 <- bootstrapse(499)
+boot.se_49 <- bootstrapse(49,ols)
+boot.se_499 <- bootstrapse(499,ols)
 boot.se_49
 boot.se_499
 ```
 ### Exercise 3: ---
 #### likelihood function
 ```{r}
+X <- cbind(1,X1,X2,X3)
+y <- as.matrix(Y)
+
 probit.llike <- function(b. = b, y. = ydum,X. = X){
   phi <- pnorm(X.%*%b.)
   phi[phi==1] <- 0.9999 # avoid NaN of log function
@@ -92,7 +94,7 @@ probit.llike <- function(b. = b, y. = ydum,X. = X){
 }
 ```
 #### Optimizer using steepest descent
-First define a function to calcuate gradient/jacobian by finite difference method
+First define a function to calculate gradient/jacobian by finite difference method
 ```{r}
 jacobian <- function(fun,par){
   d <- 1e-8
@@ -101,7 +103,7 @@ jacobian <- function(fun,par){
   return(J)
 }
 ```
-By input a inial guess of parameter, relative stopping criteria (percentage change in function), and function, using gradient decent method featuring backtracking line search, you can get the parameter that minimize the funtion. Note: First arguement of fun. must be the parameter you want to get, X and y must be set into the default value.
+By input a initial guess of parameter, relative stopping criteria (percentage change in function), and function, using gradient decent method featuring backtracking line search, you can get the parameter that minimize the function. Note: First argument of fun. must be the parameter you want to get, X and y must be set into the default value.
 ```{r}
 graddes <- function(b,stop,fun){
   alpha <- 0.01 # any initial alpha
@@ -155,14 +157,14 @@ summary(result.lp)
 #### Check significance with glm function
 ```{r message=FALSE, warning=FALSE}
 result.p.glm <- glm(ydum ~ X1 + X2 + X3, family = binomial(link = "probit"), 
-                data = data.frame(mydata))
+                data = mydata)
 coef(summary(result.p.glm))
 
 result.l.glm <- glm(ydum ~ X1 + X2 + X3, family = binomial(link = "logit"), 
-                data = data.frame(mydata))
+                data = mydata)
 coef(summary(result.l.glm))
 ```
-The coefficient varies largely across these three methods, but the sign on the coefficients are the same, and all X3 coefs are not significant.For Probit and logit, without calcuating the marginal effect, we can only interprete the sign. Higher X2 can decrease the probability of ydum = 1, which means higher X2 is likely to generate Y below mean. Higher X1 and X3 can increase the probability of ydum = 1, which means that higher X1 and X3 is likely to genrate Y above mean. This match the sign in the data generating process. For linear probability model, X1: one unit increase in X1 likely to increase the likelihood of ydum = 1 by 14%; X2: one unit increase in X2 likely to decrease the likelihood of ydum = 1 by 10%; X3: one unit increase in X3 likely to increase the likelihood of ydum = 1 by 1%.
+The coefficient varies largely across these three methods, but the sign on the coefficients are the same, and all X3 coefs are not significant.For Probit and logit, without calculating the marginal effect, we can only interpret the sign. Higher X2 can decrease the probability of ydum = 1, which means higher X2 is likely to generate Y below mean. Higher X1 and X3 can increase the probability of ydum = 1, which means that higher X1 and X3 is likely to generate Y above mean. This match the sign in the data generating process. For linear probability model, X1: one unit increase in X1 likely to increase the likelihood of ydum = 1 by 14%; X2: one unit increase in X2 likely to decrease the likelihood of ydum = 1 by 10%; X3: one unit increase in X3 likely to increase the likelihood of ydum = 1 by 1%.
 
 ### Exercise 5 ---
 #### Compute Average Marginal Effect (AME) of X of probit
@@ -193,21 +195,16 @@ se.l
 ```
 #### Compute the SE of AME by Bootstrap (Probit and Logit)
 ```{r message=FALSE, warning=FALSE, paged.print=FALSE}
-bootstrapse2 <- function(n,l){
-  # input bootstrap times and type of link function (connect to different pdf)
-  boot.me <- data.frame(matrix(nrow=4, ncol=0))
-  pdf <-ifelse(l == "probit", dnorm, dlogis) # note to myself: ifelse can only return one value
-  for (i in 1:n) {
-    # sample from existing data to get X.s, y.s
-    df.s <- mydata[sample(nrow(mydata),size = nrow(mydata),replace = T),]
-    result <- glm(ydum ~ X1 + X2 + X3, family=binomial(link = l),data.frame(df.s))
-    # calculate Average marginal effect
-    me <- mean(pdf(X%*%coef(result)))*coef(result)
-    boot.me <- cbind(boot.me,me)
-  }
-  # Report the SE over all the obtained average margianl effect
-  return(data.frame(se = apply(boot.me,1,sd)))
+# Write a function that can directly derive AME from dataframe
+probit.AME <- function(df){
+  result <- glm(ydum ~ X1 + X2 + X3, family=binomial(link = "probit"),df)
+  return(AME.p(coef(result)))
 }
-bootstrapse2(49,"probit")
-bootstrapse2(49,"logit")
+logit.AME <- function(df){
+  result <- glm(ydum ~ X1 + X2 + X3, family=binomial(link = "logit"),df)
+  return(AME.l(coef(result)))
+}
+# Plug in the prewrited "bootstrapese"
+bootstrapse(49,probit.AME)
+bootstrapse(49,logit.AME)
 ```
