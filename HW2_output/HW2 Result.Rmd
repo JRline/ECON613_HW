@@ -146,6 +146,7 @@ logit.llike <- function(b., y. = ydum,X. = X){
 }
 result.l <- optim(par = c(0,0,0,0), logit.llike)
 result.l$par
+result.l$value
 ```
 #### Optimizing Linear Probability
 ```{r}

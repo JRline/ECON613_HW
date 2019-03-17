@@ -1,6 +1,6 @@
 rm(list=ls())
 # Set Working directory
-setwd("C:/Users/jiere/Dropbox/Spring 2019/ECON 613/ECON613_HW")
+setwd("C:/Users/jiere/Dropbox/Spring 2019/ECON 613/ECON613_HW/HW1_output")
 
 # Reading the CSV files
 datstu <- read.csv("datstu.csv",header = TRUE,na.strings=c("", "NA","99"))
