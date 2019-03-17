@@ -56,6 +56,24 @@ lapply(choicePrice[,c("Income", "Fs3_4","Fs5.","Fam_Size", "college", "whtcollar
 ```
 ### Exercise 2: First Model
 This is a condiciotnal logit model, as price is alternative specific.
+#### Manually
+```{r}
+n   <- nrow(choicePrice)
+b   <- rep(-1,10)
+
+LL.2 <- function(b,Predict = F){
+  c  <- cbind(0, t(replicate(n,b[1:9]))) # Calculate the constants
+  Xb <- as.matrix(choicePrice[,3:12])*b[10] # Calculate latent utility for alternative specific char
+  XB <- Xb + c # Calculate latent utility
+  P  <- exp(XB)/rowSums(exp(XB)) # Calculate probability
+  LL <- sum(-log(P[cbind(seq(n),choicePrice$choice)])) # Only use the prob for choice that is selected
+  ifelse(Predict == F, return(LL), return(P))
+}
+
+result.2 <- optim(par = b, LL.2)
+result.2$par
+result.2$value
+```
 #### Check with mlogit
 ```{r}
 choicePrice.n <- data.frame(choicePrice)
@@ -69,37 +87,20 @@ result.2.m <- mlogit(choice ~ Price, data = Ch, method = "nr")
 summary(result.2.m)
 ```
 Interpretation: The negative sign on the price coefficient indicating that as the price of one alternative increases, the individual is less likly to buy that alternative.
-#### Manually
-```{r}
-n   <- nrow(choicePrice)
-b   <- rep(-1,10)
 
-LL.2 <- function(b){
-  c  <- cbind(0, t(replicate(n,b[1:9]))) # Calculate the constants
-  Xb   <- as.matrix(choicePrice[,3:12])*b[10] # Calculate latent utility for alternative specific char
-  XB  <- Xb + c # Calculate latent utility
-  P   <- exp(XB)/rowSums(exp(XB)) # Calculate probability
-  LL  <- sum(-log(P[cbind(seq(n),choicePrice$choice)])) # Only use the prob for choice that is selected
-  return(LL)
-}
-
-result.2 <- optim(par = b, LL.2)
-result.2$par
-result.2$value
-```
 ### Exercise 3: Second Model
 This is a multinomial logit model, as income is individual specific.
 #### Mannually
 ```{r}
 b <- c(-1,-2,-1,-2,-4,-1,-3,-2,-4,rep(0,9))
 
-LL.3 <- function(b){
-  c <- cbind(0, t(replicate(n,b[1:9]))) # Calculate the constants
+LL.3 <- function(b,Predict = F){
+  c  <- cbind(0, t(replicate(n,b[1:9]))) # Calculate the constants
   Xb <- cbind(0, t(replicate(n,b[10:18])))*choicePrice$Income # Calculate latent utility for individual specific char
   XB <- Xb+c # Calculate latent utility
-  P <- exp(XB)/rowSums(exp(XB)) # Calculate probability
+  P  <- exp(XB)/rowSums(exp(XB)) # Calculate probability
   LL <- sum(-log(P[cbind(seq(n),choicePrice$choice)])) # Only use the prob for choice that is selected
-  return(LL)
+  ifelse(Predict == F, return(LL), return(P))
 }
 result.3 <- optim(par = b, LL.3)
 result.3$par
@@ -122,24 +123,44 @@ Interpretation:
 10:Income   0.0107909: More income, more likely to choose choice 10 over choice 1.
 
 ### Exercise 4: Marginal Effects
+#### Marginal Effect for Conditional Logit
 ```{r}
-# fitted mean choice probability
-apply(fitted(result.2.m, outcome=FALSE), 2, mean)
-apply(fitted(result.3.m, outcome=FALSE), 2, mean)
-
 # Manually
-
+Pij <- LL.2(result.2$par, Predict = T)
+# Average Marginal effect
+Marginal.C <- matrix(0,10,10)
+for (j in 1:10){
+  for(k in 1:10){
+    delta <- ifelse(j == k, 1, 0)
+    Marginal.C[j,k] <- mean(Pij[,j]*(delta-Pij[,k])*result.2$par[10])
+  }
+}
+Marginal.C
 ```
+Each unit increase in price of an alternative decrease the probability of selecting that alternative and increases the probability of the other alternatives, by one percent.
 
+#### Marginal Effect for Multinomial Logit
+```{r}
+Pij <- LL.3(result.3$par, Predict = T)
+# Average Marginal effect
+Marginal.M <- NULL
+beta.avg <- Pij %*% c(0,result.3$par[10:18])
+
+for (j in 1:10){
+  Marginal.M[j] <- mean(Pij[,j]*(result.3$par[j]-beta.avg))
+}
+Marginal.M
+```
+Each unit increase in the income increases/decreases the probability of selecting alternative j by a percent.
 ### Exercise 5: IIA
 #### Mixed logit on income and price (Manually)
 ```{r}
 bf   <- c(-1,-2,-1,-2,-4,-1,-3,-2,-4,rep(0,9),-6)
 
-LL.5 <- function(bf){
+LL.5  <- function(bf){
   c   <- cbind(0, t(replicate(n,bf[1:9]))) # Calculate the constants
   Xb2 <- cbind(0, t(replicate(n,bf[10:18])))*choicePrice$Income # Calculate latent utility for individual specific char
-  Xb1  <- as.matrix(choicePrice[,3:12])*bf[19] # Calculate latent utility for alternative specific char
+  Xb1 <- as.matrix(choicePrice[,3:12])*bf[19] # Calculate latent utility for alternative specific char
   XB  <- Xb1 + Xb2 + c # Calculate latent utility
   P   <- exp(XB)/rowSums(exp(XB)) # Calculate probability
   LL  <- sum(-log(P[cbind(seq(n),choicePrice$choice)])) # Only use the prob for choice that is selected
@@ -155,17 +176,16 @@ result.5$value
 result.5.m <- mlogit(choice ~ Price | Income, data = Ch, method = "nr")
 summary(result.5.m)
 ```
-
 #### IIA mannually 
 ```{r}
 choicePrice.alt <- data.frame(choicePrice)[choicePrice$choice!=10,]
 
-bf.alt   <- c(-1,-2,-1,-2,-4,-1,-3,-2,rep(0,8),-6)
+bf.alt<- c(-1,-2,-1,-2,-4,-1,-3,-2,rep(0,8),-6)
 n.alt <- nrow(choicePrice.alt)
 LL.5.alt <- function(bf){
   c   <- cbind(0, t(replicate(n.alt,bf[1:8]))) # Calculate the constants
   Xb2 <- cbind(0, t(replicate(n.alt,bf[9:16])))*choicePrice.alt$Income # Calculate latent utility for individual specific
-  Xb1  <- as.matrix(choicePrice.alt[,3:11])*bf[17] # Calculate latent utility for alternative specific char
+  Xb1 <- as.matrix(choicePrice.alt[,3:11])*bf[17] # Calculate latent utility for alternative specific char
   XB  <- Xb1 + Xb2 + c # Calculate latent utility
   P   <- exp(XB)/rowSums(exp(XB)) # Calculate probability
   LL  <- sum(-log(P[cbind(seq(n.alt),choicePrice.alt$choice)])) # Only use the prob for choice that is selected
@@ -189,6 +209,3 @@ result.5.m.alt <- mlogit(choice ~ Price | Income, data = Ch, method = "nr", alt.
 summary(result.5.m.alt)
 hmftest(result.5.m, result.5.m.alt)
 ```
-
-
-
