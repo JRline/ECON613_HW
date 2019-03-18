@@ -177,6 +177,7 @@ result.5.m <- mlogit(choice ~ Price | Income, data = Ch, method = "nr")
 summary(result.5.m)
 ```
 #### IIA mannually 
+Take out alternative 10
 ```{r}
 choicePrice.alt <- data.frame(choicePrice)[choicePrice$choice!=10,]
 
@@ -198,11 +199,11 @@ result.5.alt$value
 ```
 #### Test statistic for MTT test
 ```{r}
-MTT <- 2*(LL.5.alt(result.5.alt$par) - LL.5.alt(result.5$par[c(1:8,10:17,19)]))
+MTT <- 2*(LL.5.alt(result.5$par[c(1:8,10:17,19)]) - LL.5.alt(result.5.alt$par))
 MTT
 pchisq(MTT,df = length(result.5.alt$par),lower.tail = F)
 ```
-From the p-value, we can reject the null hypothese and state that IIA is violated. 
+From the p-value, we can't reject the null hypothese and state that IIA is hold. 
 #### Check IIA test by hmftest
 ```{r}
 result.5.m.alt <- mlogit(choice ~ Price | Income, data = Ch, method = "nr", alt.subset = c("1","2","3","4","5","6","7","8","9"))
