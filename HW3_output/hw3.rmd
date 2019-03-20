@@ -1,5 +1,6 @@
 ---
 title: "HW03"
+subtitle: "the runtime is 41s"
 author: "Jie Ren"
 date: "March 5, 2019"
 output:
@@ -10,9 +11,10 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-### Exercise 1: Data Description
+## Exercise 1: Data Description
 ```{r message=FALSE, warning=FALSE}
 rm(list=ls())
+ptm <- proc.time()
 # install.packages("bayesm")
 # install.packages("data.table")
 # install.packages("mlogit")
@@ -29,7 +31,9 @@ choicePrice$chosen      <- colnames(choicePrice[,-(1:2)])[choicePrice$choice]
 choicePrice$chosenChar  <- sapply(strsplit(choicePrice$chosen, "_"), "[[", 2) 
 choicePrice$chosenBrand <- sapply(strsplit(choicePrice$chosen, "_"), "[[", 1) 
 ```
-#### Avg and Sd of Price by characteristic (Stk/Tub)
+### Avg and Sd of Price by characteristic
+
+#### By Type
 ```{r message=FALSE, paged.print=FALSE}
 # Extract price data by Char
 Stk <- as.matrix(choicePrice[,grepl("Stk",colnames(choicePrice))])
@@ -40,7 +44,7 @@ byType           <- data.frame(average = c(mean(Stk),mean(Tub)), sd = c(sd(Stk),
 rownames(byType) <- c("Stk","Tub")
 byType
 ```
-
+#### By Brand
 ```{r}
 # Extract price data by Brand
 # Getting a list of brand
@@ -52,7 +56,7 @@ for (i in 1:length(brandlist)){
 }
 byBrand
 ```
-By columns 
+#### By columns 
 ```{r}
 byCol <- data.frame(avg = apply(choicePrice[,3:12],2,mean)
 ,Sd = apply(choicePrice[,3:12],2,sd)
@@ -60,30 +64,35 @@ byCol <- data.frame(avg = apply(choicePrice[,3:12],2,mean)
 byCol
 ```
 
-#### Market Share by Brand and by Charicteristic
+### Market Share
+
+### Market Share by Brand
 ```{r paged.print=TRUE}
-# Market Share by Brand 
 table(choicePrice$chosenBrand)/nrow(choicePrice)
-
-# Market Share by Char
+```
+### Market Share by Char
+```{r}
 table(choicePrice$chosenChar)/nrow(choicePrice)
-
-# Market Share by Both
+```
+### Market Share by Both
+```{r}
 table(choicePrice$chosen)/nrow(choicePrice)
 ```
-#### Mapping between observed attributes and choices
+
+### Mapping between observed attributes and choices
 ```{r paged.print=TRUE}
-choicePrice <- merge(choicePrice, demos, by = "hhid", all.x = TRUE)
+choicePrice <- merge(choicePrice, demos, by = "hhid", all.x = TRUE) # merge choicePrice and demo
 
 map <- lapply(choicePrice[,c("Income", "Fs3_4","Fs5.","Fam_Size", "college", "whtcollar", "retired")],
-                         function(x) xtabs(~x + choicePrice$chosen))
-mapShare <- sapply(map, function(x) x/rowSums(x))
+                         function(x) xtabs(~x + choicePrice$chosen)) # Mapping using xtab
+mapShare <- sapply(map, function(x) x/rowSums(x)) # Get the market share
 mapShare
 ```
-### Exercise 2: First Model
+## Exercise 2: First Model
+
 This is a condiciotnal logit model, as price is alternative specific.
 
-#### Manually
+### Manually
 ```{r}
 n   <- nrow(choicePrice)
 b   <- rep(-1,10)
@@ -94,17 +103,17 @@ LL.2 <- function(b,Predict = F){
   XB <- Xb + c # Calculate latent utility
   P  <- exp(XB)/rowSums(exp(XB)) # Calculate probability
   LL <- sum(-log(P[cbind(seq(n),choicePrice$choice)])) # Only use the prob for choice that is selected
-  ifelse(Predict == F, return(LL), return(P))
+  ifelse(Predict == F, return(LL), return(P)) # To allow the output of the probability matrix when Predit = T
 }
 
 result.2 <- optim(par = b, LL.2)
 result.2$par
 result.2$value
 ```
-#### Check with mlogit
+### Check with mlogit
 ```{r}
 choicePrice.n <- data.frame(choicePrice)
-setnames(choicePrice.n, old = c("PPk_Stk", "PBB_Stk", "PFl_Stk", "PHse_Stk", "PGen_Stk", "PImp_Stk", "PSS_Tub", "PPk_Tub", "PFl_Tub", "PHse_Tub"), new = c("Price1","Price2","Price3","Price4","Price5","Price6","Price7","Price8","Price9","Price10"))
+setnames(choicePrice.n, old = c("PPk_Stk", "PBB_Stk", "PFl_Stk", "PHse_Stk", "PGen_Stk", "PImp_Stk", "PSS_Tub", "PPk_Tub", "PFl_Tub", "PHse_Tub"), new = c("Price1","Price2","Price3","Price4","Price5","Price6","Price7","Price8","Price9","Price10")) # rename the column names to allow reshaping
 
 # Reshape the data for mlogit function
 Ch <- mlogit.data(choicePrice.n, shape = "wide", varying = 3:12, choice = "choice", sep = "", alt.levels = 1:10)
@@ -115,10 +124,10 @@ summary(result.2.m)
 ```
 Interpretation: The negative sign on the price coefficient indicating that as the price of one alternative increases, the individual is less likly to buy that alternative.
 
-### Exercise 3: Second Model
+## Exercise 3: Second Model
 This is a multinomial logit model, as income is individual specific.
 
-#### Mannually
+### Mannually
 ```{r}
 b <- c(-1,-2,-1,-2,-4,-1,-3,-2,-4,rep(0,9))
 
@@ -134,27 +143,27 @@ result.3 <- optim(par = b, LL.3)
 result.3$par
 result.3$value
 ```
-#### check with mlogit
+### check with mlogit
 ```{r}
 result.3.m <- mlogit(choice ~ 0 | Income, data = Ch, method = "nr")
 summary(result.3.m)
 ```
 Interpretation: 
-2:Income   -0.0030887: More income, less likely to choose choice 2 over choice 1. 
-3:Income    0.0145862: More income, more likely to choose choice 3 over choice 1.
-4:Income    0.0040504: More income, more likely to choose choice 4 over choice 1.
-5:Income   -0.0012536: More income, less likely to choose choice 5 over choice 1.  
-6:Income    0.0306120: More income, more likely to choose choice 6 over choice 1.
-7:Income   -0.0069326: More income, less likely to choose choice 7 over choice 1. 
-8:Income    0.0228862: More income, more likely to choose choice 8 over choice 1.
-9:Income    0.0177430: More income, more likely to choose choice 9 over choice 1.
+2:Income   -0.0030887: More income, less likely to choose choice 2 over choice 1.\
+3:Income    0.0145862: More income, more likely to choose choice 3 over choice 1.\
+4:Income    0.0040504: More income, more likely to choose choice 4 over choice 1.\
+5:Income   -0.0012536: More income, less likely to choose choice 5 over choice 1.\
+6:Income    0.0306120: More income, more likely to choose choice 6 over choice 1.\
+7:Income   -0.0069326: More income, less likely to choose choice 7 over choice 1.\ 
+8:Income    0.0228862: More income, more likely to choose choice 8 over choice 1.\
+9:Income    0.0177430: More income, more likely to choose choice 9 over choice 1.\
 10:Income   0.0107909: More income, more likely to choose choice 10 over choice 1.
 
-### Exercise 4: Marginal Effects
-#### Marginal Effect for Conditional Logit
+## Exercise 4: Marginal Effects
+
+### Marginal Effect for Conditional Logit
 ```{r}
-# Manually
-Pij <- LL.2(result.2$par, Predict = T)
+Pij <- LL.2(result.2$par, Predict = T) # output the probability matrix at optimized beta
 # Average Marginal effect
 Marginal.C <- matrix(0,10,10)
 for (j in 1:10){
@@ -167,7 +176,7 @@ Marginal.C
 ```
 Each unit increase in price of an alternative decrease the probability of selecting that alternative and increases the probability of the other alternatives, by one percent.
 
-#### Marginal Effect for Multinomial Logit
+### Marginal Effect for Multinomial Logit
 ```{r}
 Pij <- LL.3(result.3$par, Predict = T)
 # Average Marginal effect
@@ -175,13 +184,15 @@ Marginal.M <- NULL
 beta.avg <- Pij %*% c(0,result.3$par[10:18])
 
 for (j in 1:10){
-  Marginal.M[j] <- mean(Pij[,j]*(result.3$par[j]-beta.avg))
+  Marginal.M[j] <- mean(Pij[,j]*(c(0,result.3$par[10:18])[j]-beta.avg))
 }
 Marginal.M
 ```
 Each unit increase in the income increases/decreases the probability of selecting alternative j by a percent.
-### Exercise 5: IIA
-#### Mixed logit on income and price (Manually)
+
+## Exercise 5: IIA
+
+### Mixed logit on income and price (Manually)
 ```{r}
 bf   <- c(-1,-2,-1,-2,-4,-1,-3,-2,-4,rep(0,9),-6)
 
@@ -199,12 +210,13 @@ result.5 <- optim(par = bf, LL.5)
 result.5$par
 result.5$value
 ```
-#### Check with mlogit package
+### Check with mlogit package
 ```{r}
 result.5.m <- mlogit(choice ~ Price | Income, data = Ch, method = "nr")
 summary(result.5.m)
 ```
-#### IIA mannually 
+### MTT mannually
+
 Take out alternative 10
 ```{r}
 choicePrice.alt <- data.frame(choicePrice)[choicePrice$choice!=10,]
@@ -225,18 +237,22 @@ result.5.alt <- optim(par = bf.alt, LL.5.alt)
 result.5.alt$par
 result.5.alt$value
 ```
-#### Test statistic for MTT test
+### Test statistic for MTT test
 ```{r}
 MTT <- 2*(LL.5.alt(result.5$par[c(1:8,10:17,19)]) - LL.5.alt(result.5.alt$par))
 MTT
 pchisq(MTT,df = length(result.5.alt$par),lower.tail = F)
 ```
 From the p-value, we can't reject the null hypothese and state that IIA is hold. 
-#### Check IIA test by hmftest
+
+### Check IIA test by hmftest
 ```{r}
-result.5.m.alt <- mlogit(choice ~ Price | Income, data = Ch, method = "nr",                     alt.subset = c("1","2","3","4","5","6","7","8","9"))
+result.5.m.alt <- mlogit(choice ~ Price | Income, data = Ch, method = "nr", alt.subset = c("1","2","3","4","5","6","7","8","9"))
 # summary(result.5.m.alt)
 hmftest(result.5.m, result.5.m.alt)
 ```
 
-
+```{r warning=FALSE}
+# check run time
+proc.time()-ptm
+```
