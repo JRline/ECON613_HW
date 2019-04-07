@@ -4,8 +4,8 @@ subtitle: "the runtime is 41s"
 author: "Jie Ren"
 date: "March 5, 2019"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -122,14 +122,15 @@ Ch <- mlogit.data(choicePrice.n, shape = "wide", varying = 3:12, choice = "choic
 result.2.m <- mlogit(choice ~ Price, data = Ch, method = "nr")
 summary(result.2.m)
 ```
-Interpretation: The negative sign on the price coefficient indicating that as the price of one alternative increases, the individual is less likly to buy that alternative.
+Interpretation: The signs on the intercepts indicating that, holding other variables constant, people’s general preference (+:prefer; -: not prefer) over that choice compared to the reference choice, which is PPk_Stk.\
+The negative sign on the price coefficient indicating that as the price of one choice increases, the individual is less likly to buy that choice (Holding other variables constant).
 
 ## Exercise 3: Second Model
 This is a multinomial logit model, as income is individual specific.
 
 ### Mannually
 ```{r}
-b <- c(-1,-2,-1,-2,-4,-1,-3,-2,-4,rep(0,9))
+b <- c(-1,-2,-1,-2,-4,-1,-3,-2,-4,rep(0,9)) # PPK_Stk as reference
 
 LL.3 <- function(b,Predict = F){
   c  <- cbind(0, t(replicate(n,b[1:9]))) # Calculate the constants
@@ -148,13 +149,15 @@ result.3$value
 result.3.m <- mlogit(choice ~ 0 | Income, data = Ch, method = "nr")
 summary(result.3.m)
 ```
-Interpretation: 
+Interpretation: (Holding other variables constant)
+The signs on the intercepts indicating that, holding other variables constant, people’s general preference (+:prefer; -: not prefer) over that choice compared to the reference choice, which is PPk_Stk.\
+Beta coefficient: \
 2:Income   -0.0030887: More income, less likely to choose choice 2 over choice 1.\
 3:Income    0.0145862: More income, more likely to choose choice 3 over choice 1.\
 4:Income    0.0040504: More income, more likely to choose choice 4 over choice 1.\
 5:Income   -0.0012536: More income, less likely to choose choice 5 over choice 1.\
 6:Income    0.0306120: More income, more likely to choose choice 6 over choice 1.\
-7:Income   -0.0069326: More income, less likely to choose choice 7 over choice 1.\ 
+7:Income   -0.0069326: More income, less likely to choose choice 7 over choice 1.\
 8:Income    0.0228862: More income, more likely to choose choice 8 over choice 1.\
 9:Income    0.0177430: More income, more likely to choose choice 9 over choice 1.\
 10:Income   0.0107909: More income, more likely to choose choice 10 over choice 1.
@@ -162,6 +165,7 @@ Interpretation:
 ## Exercise 4: Marginal Effects
 
 ### Marginal Effect for Conditional Logit
+$$\frac{\partial p_{ij}}{\partial x_{ik}}=p_{ij}(\delta_{ijk}-p_{ik})\beta$$
 ```{r}
 Pij <- LL.2(result.2$par, Predict = T) # output the probability matrix at optimized beta
 # Average Marginal effect
@@ -174,9 +178,11 @@ for (j in 1:10){
 }
 Marginal.C
 ```
-Each unit increase in price of an alternative decrease the probability of selecting that alternative and increases the probability of the other alternatives, by one percent.
+Each unit increase in price of an alternative decrease the probability of selecting that alternative and increases the probability of the other alternatives, by certain percent.
 
 ### Marginal Effect for Multinomial Logit
+$$\frac{\partial p_{ij}}{\partial x_{i}}=p_{ij}(\beta_j - \bar{\beta_i})$$
+$$\bar{\beta_i}= \sum_l p_{il}\beta_l$$
 ```{r}
 Pij <- LL.3(result.3$par, Predict = T)
 # Average Marginal effect
@@ -188,13 +194,13 @@ for (j in 1:10){
 }
 Marginal.M
 ```
-Each unit increase in the income increases/decreases the probability of selecting alternative j by a percent.
+Each unit increase in the income increases/decreases (as the sign) the probability of selecting alternative j by certain percent.
 
 ## Exercise 5: IIA
 
 ### Mixed logit on income and price (Manually)
 ```{r}
-bf   <- c(-1,-2,-1,-2,-4,-1,-3,-2,-4,rep(0,9),-6)
+bf   <- c(-1,1,-2,-3,-2,0,1,2,-4,rep(0,9),-6)
 
 LL.5  <- function(bf){
   c   <- cbind(0, t(replicate(n,bf[1:9]))) # Calculate the constants
@@ -221,7 +227,7 @@ Take out alternative 10
 ```{r}
 choicePrice.alt <- data.frame(choicePrice)[choicePrice$choice!=10,]
 
-bf.alt<- c(-1,-2,-1,-2,-4,-1,-3,-2,rep(0,8),-6)
+bf.alt<- c(-1,1,-2,-3,-2,0,1,2,rep(0,8),-6)
 n.alt <- nrow(choicePrice.alt)
 LL.5.alt <- function(bf){
   c   <- cbind(0, t(replicate(n.alt,bf[1:8]))) # Calculate the constants
@@ -254,5 +260,5 @@ hmftest(result.5.m, result.5.m.alt)
 
 ```{r warning=FALSE}
 # check run time
-proc.time()-ptm
+runTime = proc.time()-ptm
 ```

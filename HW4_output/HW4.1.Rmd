@@ -1,0 +1,140 @@
+---
+title: "HW4"
+author: "Jie Ren"
+date: "April 4, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Exercise 1
+```{r}
+rm(list=ls())
+setwd("C:/Users/jiere/Dropbox/Spring 2019/ECON 613/ECON613_HW/HW4_output")
+# install.packages("lme4")
+# install.packages("Matrix")
+library("lme4")
+kt <- read.csv("Koop-Tobias.csv")
+```
+#### Find the sample dimension for 5 randomly selected individual
+```{r}
+rd <- sample(1:2178,5)
+dimension <- aggregate(list(Dimension = kt$PERSONID), list(PERSONID = kt$PERSONID), length)[rd,]
+rownames(dimension) <- NULL
+dimension
+```
+Noticed that this is an unbalanced panel and the time trend variable is not consecutive
+
+## Exercise 2
+
+#### Check with lme4 package
+```{r}
+re.lm <- lmer(LOGWAGE ~ EDUC + POTEXPER + (1|PERSONID), data = kt) 
+summary(re.lm)
+```
+#### Calculate the random effect using the transformed model (Mannually)
+(Method from Principle of Econometrics)
+Fisrt let's define a function for between estimator
+```{r}
+tmean <- function(x,id,rep = T){# calculate the mean for each individual id, and and repeat these mean for the same id
+  # or alternatively use ave
+  dim <- aggregate(list(Tp = id), list(id = id), length)
+  mean <- aggregate(list(idmean = x),list(id = id),mean)
+  gpmean <- rep(mean$idmean,dim$Tp)
+  ifelse(rep == T, return(gpmean),return(mean$idmean))
+}
+
+
+fix.bt <- function(y,X,id){
+  dep <- tmean(y,id,rep = F)
+  indep <- apply(X,2,tmean, id = id, rep = F)
+  result <- lm(dep~indep)
+  return(result)
+}
+```
+The let's define a funciton for with-in estimator
+```{r}
+fix.wi <- function(y,X,id){
+  dep <- y - tmean(y,id)
+  indep <- as.matrix(X - apply(X,2,tmean, id = id))
+  result <- lm(dep~0+indep)
+  return(result)
+}
+```
+Using the variance from these two estimator, we are able the caculate the vairance of residual in random effect estimator. Then we can get get the transformed model and simply do OLS!
+```{r}
+fix.re.ib <- function(y,X,id){
+  N <- length(id) 
+  n <- length(unique(id))
+  k <- ncol(X)
+  sigma2_u <- sum((summary(fix.bt(y,X,id))$residual)^2)/(n-k)
+  sigma2_e <- sum((summary(fix.wi(y,X,id))$residual)^2)/((N-n)-k)
+  
+  # for unbalanced panel use harmonized mean of time period of each id has
+  dim <- aggregate(list(Tp = id), list(id = id), length)
+  Th <- length(unique(id))/sum(1/dim$Tp) 
+  sigma2_v <- sigma2_u - sigma2_e/Th
+  
+  # Calculate lumbda for the tranformed model
+  Tp_i <- rep(dim$Tp,dim$Tp)
+  lambda <- 1-sqrt(sigma2_e/(Tp_i*sigma2_v + sigma2_e)) # special case of unbalanced panel
+  
+  # Transformed model
+  X <- cbind(Intercept = 1,X)
+  dep <- y - lambda*tmean(y,id)
+  indep <- as.matrix(X - rep(lambda,ncol(X))*apply(X,2,tmean, id = id))
+  result <- lm(dep~0+indep)
+  return(result)
+}
+
+coef(fix.re.ib(kt$LOGWAGE,kt[,c("EDUC","POTEXPER")],kt$PERSONID))
+```
+
+
+
+## Exercise 3
+Between and with-in estimator
+```{r}
+coef(fix.wi(kt$LOGWAGE,kt[,c("EDUC","POTEXPER")],kt$PERSONID))
+coef(fix.bt(kt$LOGWAGE,kt[,c("EDUC","POTEXPER")],kt$PERSONID))
+```
+First time difference estimator
+```{r}
+fix.fd <- function(y,X,id){
+  df <- data.frame(y,X,id)
+  for (i in 1:ncol(X)){
+    df <- transform(df, col=ave(X[,i], id, FUN = function(x) c(NA, diff(x))))
+    names(df)[ncol(df)]<-paste("indep",i,sep=" ") 
+  }
+  df <- transform(df, dep=ave(y, id, FUN = function(x) c(NA, diff(x))))
+  
+  indep <- as.matrix(na.omit(df[,grepl("indep",colnames(df))]))
+  dep <- na.omit(df[,"dep"])
+  result <- lm(dep~0+indep)
+  return(result)
+}
+
+coef(fix.fd(kt$LOGWAGE,kt[,c("EDUC","POTEXPER")],kt$PERSONID))
+```
+## Exercise 4
+```{r}
+# randomly selection 100 individual
+rnd <- sample(1:2178,100)
+kt.rand <- kt[kt$PERSONID %in% rnd,]
+
+# do with ols
+fix.dum <-lm(LOGWAGE ~ EDUC + POTEXPER+factor(PERSONID) - 1, data = kt.rand)
+summary(fix.dum)
+```
+
+
+```{r}
+fix.dum <-lm(LOGWAGE ~ EDUC + POTEXPER+factor(PERSONID) - 1, data = kt.rand)
+summary(fix.dum)
+```
+Since there may be the issue of rubost standard error.
+```{r}
+
+```
