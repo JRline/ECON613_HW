@@ -45,14 +45,8 @@ Noticed that this is an unbalanced panel and the time trend variable is not cons
 re.lm <- lmer(LOGWAGE ~ EDUC + POTEXPER + (1|PERSONID), data = kt) 
 summary(re.lm)
 ```
+## Exercise 2&3
 
-
-
-
-
-
-## Exercise 3
-Define a function for between estimator
 #### Calculate the random effect using the transformed model (Mannually)
 (Method from Principle of Econometrics)
 Fisrt let's define a function for between estimator
@@ -107,10 +101,10 @@ fix.re.ib <- function(y,X,id){
   result  <- lm(dep~0+indep)
   return(result)
 }
-
-coef(fix.re.ib(kt$LOGWAGE,kt[,c("EDUC","POTEXPER")],kt$PERSONID))
 ```
-First time difference estimator
+
+#### First time difference estimator
+Here we regard the discouninous timetime trend as continous, per Professor Sidibe.
 ```{r}
 fix.fd <- function(y,X,id){
   df <- data.frame(y,X,id)
@@ -126,10 +120,15 @@ fix.fd <- function(y,X,id){
   return(result)
 }
 
+coef(fix.re.ib(kt$LOGWAGE,kt[,c("EDUC","POTEXPER")],kt$PERSONID))
+coef(fix.wi(kt$LOGWAGE,kt[,c("EDUC","POTEXPER")],kt$PERSONID))
+coef(fix.bt(kt$LOGWAGE,kt[,c("EDUC","POTEXPER")],kt$PERSONID))
 coef(fix.fd(kt$LOGWAGE,kt[,c("EDUC","POTEXPER")],kt$PERSONID))
 ```
+Their result are close for random effect and with-in estimator, but others are quite different
+
 ## Exercise 4
-```{r}
+```{r warning=FALSE}
 # randomly selection 100 individual
 rnd <- sample(1:2178,100)
 kt.rand <- kt[kt$PERSONID %in% rnd,]
@@ -167,7 +166,7 @@ ll.DVLS <- function(b){
   ll.s
   return(ll.s)
 }
-
+set.seed(1)
 y <- kt.rand$LOGWAGE
 X <- cbind(as.matrix(kt.rand[,c("EDUC","POTEXPER")]),as.matrix(dummy))
 b <- rnorm(102)
@@ -175,12 +174,19 @@ b <- rnorm(102)
 result <- optim(b, ll.DVLS)
 result$par
 ```
-
-
+Regressing using the time invarient variables
 ```{r}
 coef(fix.dvls(kt.rand,"LOGWAGE",c("ABILITY","MOTHERED","FATHERED","BRKNHOME","SIBLINGS"),"PERSONID"))
 ```
-Since there may be the issue of rubost standard error.
-```{r}
+Since there may be the issue of heteroskedasticity causing by the correlation of error term between each individual, a sandwich form (huber white) standard error. 
+```{r message=FALSE, warning=FALSE}
+X <- as.matrix(kt[,c("EDUC","POTEXPER")])
+inv_XX <- solve(t(X) %*% X)
+residual <- fix.wi(kt$LOGWAGE,kt[,c("EDUC","POTEXPER")],kt$PERSONID)$residuals
 
+D <- t(X) %*% diag(residual)^2 %*% X
+
+EHW <- inv_XX %*% D %*% inv_XX
+
+diag(sqrt(EHW))
 ```
