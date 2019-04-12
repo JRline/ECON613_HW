@@ -3,9 +3,9 @@
       name:  {res}<unnamed>
        {txt}log:  {res}C:\Users\jiere\Dropbox\Spring 2019\ECON 613\ECON613_HW\HW5_output\HW5.smcl
   {txt}log type:  {res}smcl
- {txt}opened on:  {res}11 Apr 2019, 17:48:56
+ {txt}opened on:  {res}11 Apr 2019, 23:23:29
 
-{com}. do "C:\Users\jiere\AppData\Local\Temp\STD14ac_000000.tmp"
+{com}. do "C:\Users\jiere\AppData\Local\Temp\STD4870_000000.tmp"
 {txt}
 {com}. clear all
 {res}{txt}
@@ -362,7 +362,7 @@ Iteration 3:{space 3}log likelihood = {res:-653.74994}
 {com}. sort hhid
 {txt}
 {com}. save `tmp'
-{txt}file C:\Users\jiere\AppData\Local\Temp\ST_14ac_000002.tmp saved
+{txt}file C:\Users\jiere\AppData\Local\Temp\ST_4870_000002.tmp saved
 
 {com}. 
 . restore
@@ -376,7 +376,7 @@ Iteration 3:{space 3}log likelihood = {res:-653.74994}
 {p 0 4 2}
 variable{txt} hhid
 does not uniquely identify observations in
-C:\Users\jiere\AppData\Local\Temp\ST_14ac_000002.tmp
+C:\Users\jiere\AppData\Local\Temp\ST_4870_000002.tmp
 {p_end}
 
 {com}. drop hhid v1 _merge
@@ -420,6 +420,39 @@ C:\Users\jiere\AppData\Local\Temp\ST_14ac_000002.tmp
       Total {c |}{res}      4,470      100.00
 {txt}
 {com}. 
+. gen choice_type = cond(choice == 1|choice == 2|choice == 3|choice == 4|choice ///
+> == 5|choice == 6,"stk","tub")
+{txt}
+{com}. tab choice_type
+
+{txt}choice_type {c |}      Freq.     Percent        Cum.
+{hline 12}{c +}{hline 35}
+        stk {c |}{res}      3,690       82.55       82.55
+{txt}        tub {c |}{res}        780       17.45      100.00
+{txt}{hline 12}{c +}{hline 35}
+      Total {c |}{res}      4,470      100.00
+{txt}
+{com}. 
+. gen choice_brand = cond(choice == 1|choice == 8,"ppk", /*
+> */cond(choice == 2,"pbb",cond(choice == 3|choice == 9,"pfl",cond(choice == 4|choice == 10,"phse",/*
+> */cond(choice == 5,"pgen",cond(choice == 6,"pimp",cond(choice == 7,"pss","")))))))
+{txt}
+{com}. tab choice_brand
+
+{txt}choice_bran {c |}
+          d {c |}      Freq.     Percent        Cum.
+{hline 12}{c +}{hline 35}
+        pbb {c |}{res}        699       15.64       15.64
+{txt}        pfl {c |}{res}        468       10.47       26.11
+{txt}       pgen {c |}{res}        315        7.05       33.15
+{txt}       phse {c |}{res}        626       14.00       47.16
+{txt}       pimp {c |}{res}         74        1.66       48.81
+{txt}        ppk {c |}{res}      1,969       44.05       92.86
+{txt}        pss {c |}{res}        319        7.14      100.00
+{txt}{hline 12}{c +}{hline 35}
+      Total {c |}{res}      4,470      100.00
+{txt}
+{com}. 
 . * Exercise 2&4
 . * conditional logit
 . * reshape from wide to long
@@ -434,7 +467,7 @@ C:\Users\jiere\AppData\Local\Temp\ST_14ac_000002.tmp
 Data{col 36}wide{col 43}->{col 48}long
 {hline 77}
 Number of obs.                 {res}    4470   {txt}->{res}   44700
-{txt}Number of variables            {res}      19   {txt}->{res}      11
+{txt}Number of variables            {res}      21   {txt}->{res}      13
 {txt}j variable (10 values)                    ->   {res}_j
 {txt}xij variables:
               {res}Price1 Price2 ... Price10   {txt}->   {res}Price
@@ -1358,7 +1391,7 @@ F test that all u_i=0: F({res}2177{txt}, {res}15739{txt}) = {res}9.95{col 62}{tx
 {com}. sort personid
 {txt}
 {com}. save `tmp'
-{txt}file C:\Users\jiere\AppData\Local\Temp\ST_14ac_000004.tmp saved
+{txt}file C:\Users\jiere\AppData\Local\Temp\ST_4870_000004.tmp saved
 
 {com}. 
 . restore
@@ -1663,30 +1696,56 @@ Linear regression                               Number of obs     = {res}       
 {res}
 {txt}{p}Linear, Probit, Logit
 
-{hline 12}{c -}{c TT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
-{ralign 12:Variable} {c |} {center 10:linear_} {space 1} {center 10:probit_} {space 1} {center 10:probit_m} {space 1} {center 10:probit_m~a} {space 1} {center 10:probit_m~t} {space 1} {center 10:logit_} {space 1} {center 10:logit_md~a} {space 1} {center 10:logit_mb~t} {space 1}
-{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{hline 12}{c -}{c TT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 12:Variable} {c |} {center 10:linear_} {space 1} {center 10:probit_} {space 1} {center 10:probit_m} {space 1} {center 10:probit_m~a} {space 1} {center 10:probit_m~t} {space 1} {center 10:logit_} {space 1}
+{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
 {res}{txt}{res}_            {txt}{c |}{res}
-{txt}{space 10}X1 {c |}{res} {ralign 10:.01874188}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
-{res}{txt}{space 12} {c |}{res} {ralign 10:.02669155}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
-{res}{txt}{space 10}X2 {c |}{res} {ralign 10:-.03834067}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
-{res}{txt}{space 12} {c |}{res} {ralign 10:.00434384}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
-{res}{txt}{space 10}X3 {c |}{res} {ralign 10:.04659131}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
-{res}{txt}{space 12} {c |}{res} {ralign 10:.03281539}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
-{res}{txt}{space 7}_cons {c |}{res} {ralign 10:.67081067}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
-{res}{txt}{space 12} {c |}{res} {ralign 10:.06249412}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
-{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{txt}{space 10}X1 {c |}{res} {ralign 10:.01874188}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
+{res}{txt}{space 12} {c |}{res} {ralign 10:.02669155}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
+{res}{txt}{space 10}X2 {c |}{res} {ralign 10:-.03834067}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
+{res}{txt}{space 12} {c |}{res} {ralign 10:.00434384}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
+{res}{txt}{space 10}X3 {c |}{res} {ralign 10:.04659131}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
+{res}{txt}{space 12} {c |}{res} {ralign 10:.03281539}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
+{res}{txt}{space 7}_cons {c |}{res} {ralign 10:.67081067}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
+{res}{txt}{space 12} {c |}{res} {ralign 10:.06249412}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
 {res}{txt}{res}Y_dum        {txt}{c |}{res}
-{txt}{space 10}X1 {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:.04497207}{txt} {space 1}{res} {ralign 10:.04497207}{txt} {space 1}{res} {ralign 10:.04497207}{txt} {space 1}{res} {ralign 10:.07525617}{txt} {space 1}{res} {ralign 10:.07525617}{txt} {space 1}{res} {ralign 10:.07525617}{txt} {space 1}{res} {ralign 10:.07525617}{txt} {space 1}
-{res}{txt}{space 12} {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:.07120618}{txt} {space 1}{res} {ralign 10:.07120618}{txt} {space 1}{res} {ralign 10:.07120618}{txt} {space 1}{res} {ralign 10:.09060722}{txt} {space 1}{res} {ralign 10:.11528701}{txt} {space 1}{res} {ralign 10:.11528701}{txt} {space 1}{res} {ralign 10:.10346309}{txt} {space 1}
-{res}{txt}{space 10}X2 {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:-.10744515}{txt} {space 1}{res} {ralign 10:-.10744515}{txt} {space 1}{res} {ralign 10:-.10744515}{txt} {space 1}{res} {ralign 10:-.17363591}{txt} {space 1}{res} {ralign 10:-.17363591}{txt} {space 1}{res} {ralign 10:-.17363591}{txt} {space 1}{res} {ralign 10:-.17363591}{txt} {space 1}
-{res}{txt}{space 12} {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:.01280879}{txt} {space 1}{res} {ralign 10:.01280879}{txt} {space 1}{res} {ralign 10:.01280879}{txt} {space 1}{res} {ralign 10:.02168994}{txt} {space 1}{res} {ralign 10:.02137843}{txt} {space 1}{res} {ralign 10:.02137843}{txt} {space 1}{res} {ralign 10:.01972537}{txt} {space 1}
-{res}{txt}{space 10}X3 {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:.12439279}{txt} {space 1}{res} {ralign 10:.12439279}{txt} {space 1}{res} {ralign 10:.12439279}{txt} {space 1}{res} {ralign 10:.20079145}{txt} {space 1}{res} {ralign 10:.20079145}{txt} {space 1}{res} {ralign 10:.20079145}{txt} {space 1}{res} {ralign 10:.20079145}{txt} {space 1}
-{res}{txt}{space 12} {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:.08770008}{txt} {space 1}{res} {ralign 10:.08770008}{txt} {space 1}{res} {ralign 10:.08770008}{txt} {space 1}{res} {ralign 10:.156628}{txt} {space 1}{res} {ralign 10:.14189878}{txt} {space 1}{res} {ralign 10:.14189878}{txt} {space 1}{res} {ralign 10:.14279787}{txt} {space 1}
-{res}{txt}{space 7}_cons {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:.48680797}{txt} {space 1}{res} {ralign 10:.48680797}{txt} {space 1}{res} {ralign 10:.48680797}{txt} {space 1}{res} {ralign 10:.77878889}{txt} {space 1}{res} {ralign 10:.77878889}{txt} {space 1}{res} {ralign 10:.77878889}{txt} {space 1}{res} {ralign 10:.77878889}{txt} {space 1}
-{res}{txt}{space 12} {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:.1690792}{txt} {space 1}{res} {ralign 10:.1690792}{txt} {space 1}{res} {ralign 10:.1690792}{txt} {space 1}{res} {ralign 10:.24338472}{txt} {space 1}{res} {ralign 10:.27359913}{txt} {space 1}{res} {ralign 10:.27359913}{txt} {space 1}{res} {ralign 10:.25548708}{txt} {space 1}
-{res}{txt}{hline 12}{c -}{c BT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
-{ralign 118:legend: b/se}
+{txt}{space 10}X1 {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:.04497207}{txt} {space 1}{res} {ralign 10:.04497207}{txt} {space 1}{res} {ralign 10:.04497207}{txt} {space 1}{res} {ralign 10:.07525617}{txt} {space 1}{res} {ralign 10:.07525617}{txt} {space 1}
+{res}{txt}{space 12} {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:.07120618}{txt} {space 1}{res} {ralign 10:.07120618}{txt} {space 1}{res} {ralign 10:.07120618}{txt} {space 1}{res} {ralign 10:.09060722}{txt} {space 1}{res} {ralign 10:.11528701}{txt} {space 1}
+{res}{txt}{space 10}X2 {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:-.10744515}{txt} {space 1}{res} {ralign 10:-.10744515}{txt} {space 1}{res} {ralign 10:-.10744515}{txt} {space 1}{res} {ralign 10:-.17363591}{txt} {space 1}{res} {ralign 10:-.17363591}{txt} {space 1}
+{res}{txt}{space 12} {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:.01280879}{txt} {space 1}{res} {ralign 10:.01280879}{txt} {space 1}{res} {ralign 10:.01280879}{txt} {space 1}{res} {ralign 10:.02168994}{txt} {space 1}{res} {ralign 10:.02137843}{txt} {space 1}
+{res}{txt}{space 10}X3 {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:.12439279}{txt} {space 1}{res} {ralign 10:.12439279}{txt} {space 1}{res} {ralign 10:.12439279}{txt} {space 1}{res} {ralign 10:.20079145}{txt} {space 1}{res} {ralign 10:.20079145}{txt} {space 1}
+{res}{txt}{space 12} {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:.08770008}{txt} {space 1}{res} {ralign 10:.08770008}{txt} {space 1}{res} {ralign 10:.08770008}{txt} {space 1}{res} {ralign 10:.156628}{txt} {space 1}{res} {ralign 10:.14189878}{txt} {space 1}
+{res}{txt}{space 7}_cons {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:.48680797}{txt} {space 1}{res} {ralign 10:.48680797}{txt} {space 1}{res} {ralign 10:.48680797}{txt} {space 1}{res} {ralign 10:.77878889}{txt} {space 1}{res} {ralign 10:.77878889}{txt} {space 1}
+{res}{txt}{space 12} {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:.1690792}{txt} {space 1}{res} {ralign 10:.1690792}{txt} {space 1}{res} {ralign 10:.1690792}{txt} {space 1}{res} {ralign 10:.24338472}{txt} {space 1}{res} {ralign 10:.27359913}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c BT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 92:legend: b/se}
+
+{res}
+{txt}{hline 12}{c -}{c TT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 12:Variable} {c |} {center 10:logit_md~a} {space 1} {center 10:logit_mb~t} {space 1}
+{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}_            {txt}{c |}{res}
+{txt}{space 10}X1 {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
+{res}{txt}{space 12} {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
+{res}{txt}{space 10}X2 {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
+{res}{txt}{space 12} {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
+{res}{txt}{space 10}X3 {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
+{res}{txt}{space 12} {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
+{res}{txt}{space 7}_cons {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
+{res}{txt}{space 12} {c |}{res} {ralign 10:}{txt} {space 1}{res} {ralign 10:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}Y_dum        {txt}{c |}{res}
+{txt}{space 10}X1 {c |}{res} {ralign 10:.07525617}{txt} {space 1}{res} {ralign 10:.07525617}{txt} {space 1}
+{res}{txt}{space 12} {c |}{res} {ralign 10:.11528701}{txt} {space 1}{res} {ralign 10:.10346309}{txt} {space 1}
+{res}{txt}{space 10}X2 {c |}{res} {ralign 10:-.17363591}{txt} {space 1}{res} {ralign 10:-.17363591}{txt} {space 1}
+{res}{txt}{space 12} {c |}{res} {ralign 10:.02137843}{txt} {space 1}{res} {ralign 10:.01972537}{txt} {space 1}
+{res}{txt}{space 10}X3 {c |}{res} {ralign 10:.20079145}{txt} {space 1}{res} {ralign 10:.20079145}{txt} {space 1}
+{res}{txt}{space 12} {c |}{res} {ralign 10:.14189878}{txt} {space 1}{res} {ralign 10:.14279787}{txt} {space 1}
+{res}{txt}{space 7}_cons {c |}{res} {ralign 10:.77878889}{txt} {space 1}{res} {ralign 10:.77878889}{txt} {space 1}
+{res}{txt}{space 12} {c |}{res} {ralign 10:.27359913}{txt} {space 1}{res} {ralign 10:.25548708}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c BT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 40:legend: b/se}
 {res}{txt}
 {com}. 
 . * HW 3summary
@@ -2007,13 +2066,14 @@ Linear regression                               Number of obs     = {res}       
 {ralign 40:legend: b/se}
 {res}{txt}
 {com}. 
+. 
 {txt}end of do-file
 
 {com}. log close
       {txt}name:  {res}<unnamed>
        {txt}log:  {res}C:\Users\jiere\Dropbox\Spring 2019\ECON 613\ECON613_HW\HW5_output\HW5.smcl
   {txt}log type:  {res}smcl
- {txt}closed on:  {res}11 Apr 2019, 17:49:36
+ {txt}closed on:  {res}11 Apr 2019, 23:24:08
 {txt}{.-}
 {smcl}
 {txt}{sf}{ul off}

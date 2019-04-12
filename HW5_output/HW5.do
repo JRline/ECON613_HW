@@ -80,6 +80,15 @@ su ppk_stk  pbb_stk pfl_stk phse_stk pgen_stk pimp_stk pss_tub /*
 */ppk_tub pfl_tub phse_tub
 tab choice
 
+gen choice_type = cond(choice == 1|choice == 2|choice == 3|choice == 4|choice ///
+== 5|choice == 6,"stk","tub")
+tab choice_type
+
+gen choice_brand = cond(choice == 1|choice == 8,"ppk", /*
+*/cond(choice == 2,"pbb",cond(choice == 3|choice == 9,"pfl",cond(choice == 4|choice == 10,"phse",/*
+*/cond(choice == 5,"pgen",cond(choice == 6,"pimp",cond(choice == 7,"pss","")))))))
+tab choice_brand
+
 * Exercise 2&4
 * conditional logit
 * reshape from wide to long
