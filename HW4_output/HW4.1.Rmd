@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Exercise 1
-```{r}
+```{r message=FALSE, warning=FALSE}
 rm(list=ls())
 setwd("C:/Users/jiere/Dropbox/Spring 2019/ECON 613/ECON613_HW/HW4_output")
 # install.packages("lme4")
@@ -120,10 +120,10 @@ fix.fd <- function(y,X,id){
   return(result)
 }
 
-coef(fix.re.ib(kt$LOGWAGE,kt[,c("EDUC","POTEXPER")],kt$PERSONID))
-coef(fix.wi(kt$LOGWAGE,kt[,c("EDUC","POTEXPER")],kt$PERSONID))
-coef(fix.bt(kt$LOGWAGE,kt[,c("EDUC","POTEXPER")],kt$PERSONID))
-coef(fix.fd(kt$LOGWAGE,kt[,c("EDUC","POTEXPER")],kt$PERSONID))
+coef(fix.re.ib(kt$LOGWAGE,kt[,c("EDUC","POTEXPER")],kt$PERSONID)) # random
+coef(fix.wi(kt$LOGWAGE,kt[,c("EDUC","POTEXPER")],kt$PERSONID)) # with-in
+coef(fix.bt(kt$LOGWAGE,kt[,c("EDUC","POTEXPER")],kt$PERSONID)) # between
+coef(fix.fd(kt$LOGWAGE,kt[,c("EDUC","POTEXPER")],kt$PERSONID)) # first difference
 ```
 Their result are close for random effect and with-in estimator, but others are quite different
 
@@ -151,7 +151,10 @@ fix.dvls <- function(df, y_name, X_name,id_name,dmatrix = F){
   ifelse(dmatrix == F,return(result.d),return(dummy))
 }
 
-coef(fix.dvls(kt.rand,"LOGWAGE",c("EDUC","POTEXPER"),"PERSONID"))
+individual <- coef(fix.dvls(kt.rand,"LOGWAGE",c("EDUC","POTEXPER"),"PERSONID"))
+individual <- individual[3:length(individual)]
+
+
 
 # do with MLE
 dummy <- fix.dvls(kt.rand,"LOGWAGE",c("EDUC","POTEXPER"),"PERSONID",dmatrix = T)
@@ -174,11 +177,17 @@ b <- rnorm(102)
 result <- optim(b, ll.DVLS)
 result$par
 ```
+NOTE: this likelihood funcion is not converging.
+
 Regressing using the time invarient variables
 ```{r}
-coef(fix.dvls(kt.rand,"LOGWAGE",c("ABILITY","MOTHERED","FATHERED","BRKNHOME","SIBLINGS"),"PERSONID"))
+kt.rand.tiv <- kt.rand[!duplicated(kt.rand$PERSONID),] # keep one obs for each person
+kt.rand.tiv <- kt.rand.tiv[-1,]
+kt.rand.tiv$individual <- individual
+result.2 <- lm(individual~ABILITY + MOTHERED + FATHERED + BRKNHOME + SIBLINGS, kt.rand.tiv)
+summary(result.2)
 ```
-Since there may be the issue of heteroskedasticity causing by the correlation of error term between each individual, a sandwich form (huber white) standard error. 
+For with-in estimator: Since there may be the issue of heteroskedasticity causing by the correlation of error term between each individual, a sandwich form (huber white) standard error is needed rathe than standard ols se. 
 ```{r message=FALSE, warning=FALSE}
 X <- as.matrix(kt[,c("EDUC","POTEXPER")])
 inv_XX <- solve(t(X) %*% X)
