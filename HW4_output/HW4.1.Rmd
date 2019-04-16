@@ -12,7 +12,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Exercise 1
 ```{r message=FALSE, warning=FALSE}
 rm(list=ls())
-set.seed(2)
 setwd("C:/Users/jiere/Dropbox/Spring 2019/ECON 613/ECON613_HW/HW4_output")
 # install.packages("lme4")
 # install.packages("Matrix")
@@ -133,7 +132,6 @@ Their result are close for random effect and with-in estimator, but others are q
 # randomly selection 100 individual
 rnd <- sample(1:2178,100)
 kt.rand <- kt[kt$PERSONID %in% rnd,]
-
 fix.dvls <- function(df, y_name, X_name,id_name,dmatrix = F){
   idcol <- which( colnames(df)== id_name )
   idx   <- unique(df[,idcol])
@@ -151,15 +149,9 @@ fix.dvls <- function(df, y_name, X_name,id_name,dmatrix = F){
   result.d  <- lm(dep~0+indep)
   ifelse(dmatrix == F,return(result.d),return(dummy))
 }
-
-individual <- coef(fix.dvls(kt.rand,"LOGWAGE",c("EDUC","POTEXPER"),"PERSONID"))
-individual <- individual[3:length(individual)]
-
-
-
+coef(fix.dvls(kt.rand,"LOGWAGE",c("EDUC","POTEXPER"),"PERSONID"))
 # do with MLE
 dummy <- fix.dvls(kt.rand,"LOGWAGE",c("EDUC","POTEXPER"),"PERSONID",dmatrix = T)
-
 # Define likelihood function
 ll.DVLS <- function(b){
   n    <- length(y)
@@ -173,21 +165,58 @@ ll.DVLS <- function(b){
 
 y <- kt.rand$LOGWAGE
 X <- cbind(as.matrix(kt.rand[,c("EDUC","POTEXPER")]),as.matrix(dummy))
-b <- rnorm(102)
 
-result <- optim(b, ll.DVLS)
-result$par
+for (i in 1:10){
+  tryCatch({
+  set.seed(i)
+  b <- rnorm(102)
+  result <- optim(b, ll.DVLS)
+  print(paste("Succeed but with convergence equal",result$convergence,sep = " "))
+  }, error=function(e){print(paste("Failed with convergence equal",result$convergence,sep = " "))})
+}
+set.seed(NULL)
 ```
-NOTE: this likelihood funcion is not converging.
+Result: this likelihood funcion is not converging. 
 
-Regressing using the time invarient variables
+#### Part2: Regressing using the time invarient variables
 ```{r}
-kt.rand.tiv <- kt.rand[!duplicated(kt.rand$PERSONID),] # keep one obs for each person
-kt.rand.tiv <- kt.rand.tiv[-1,]
-kt.rand.tiv$individual <- individual
-result.2 <- lm(individual~ABILITY + MOTHERED + FATHERED + BRKNHOME + SIBLINGS, kt.rand.tiv)
-summary(result.2)
+tiv.reg <- function (kt.bt){
+    # calculate the result based on input function
+    individual <- coef(lm(LOGWAGE~0+EDUC+POTEXPER+as.factor(PERSONID),kt.bt))
+    individual <- individual[3:length(individual)]
+    
+    kt.bt.tiv <- kt.bt[!duplicated(kt.bt$PERSONID),] # keep one obs for each person
+    
+    # regress fixed effection on time in-varients
+    kt.bt.tiv$individual <- individual
+    result.3 <- lm(individual~ABILITY + MOTHERED + FATHERED + BRKNHOME + SIBLINGS, kt.bt.tiv)
+    return(coef(result.3))
+}
+
+
+# Do ols to get individual fixed effect
+tiv.reg(kt.rand) 
+tiv.res <- data.frame(tiv.reg(kt.rand))
+
+boot.result <- tiv.res[-1] # creating empty data frame
+id100 <- unique(kt.rand$PERSONID)
+
+for (i in 1:49){
+    # sampling from existing 100 person
+    smp <- sample(id100,100, replace = T)
+    kt.bt <- kt.rand[0,]
+    for (j in 1:100){
+      kt.bt <- rbind(kt.bt, kt.rand[kt.rand$PERSONID %in% smp[j],])
+    }
+    # apply tiv.reg, collect result
+    boot.result <- cbind(boot.result,tiv.reg(kt.bt))
+}
+data.frame(coefficient = tiv.res, se = apply(boot.result,1,sd)) # corrected SE
 ```
+None of these are significant
+
+#### Part 3
+
 For with-in estimator: Since there may be the issue of heteroskedasticity causing by the correlation of error term between each individual, a sandwich form (huber white) standard error is needed rathe than standard ols se. 
 ```{r message=FALSE, warning=FALSE}
 X <- as.matrix(kt[,c("EDUC","POTEXPER")])
