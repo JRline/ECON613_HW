@@ -1,8 +1,12 @@
+log using "C:\Users\jiere\Dropbox\Spring 2019\ECON 613\ECON613_HW\HW5_output\HW5", replace
+
 clear all
 set more off, perm
 set scrollbufsize 2000000
 cd "C:\Users\jiere\Dropbox\Spring 2019\ECON 613\ECON613_HW\HW5_output"
 pwd
+set seed 1
+
 
 ********
 * HW 2 *
@@ -185,7 +189,7 @@ global yvar_ logwage
 global xvar_ "educ potexper"
 
 * first get the indiviudal fixed effect
-reg $yvar_ $xvar_ i.personid, vce(robust)
+reg $yvar_ $xvar_ i.personid, nocon vce(robust)
 est sto idfix
 
 * store the coefficient and only keep individual effects
@@ -215,3 +219,4 @@ est tab c_logit m_logit mix_logit, se title(Conditional Logit)
 est tab re be fe fd, se title(Panel Methods)
 est tab idfix idfix_timinv, se title(Individual Fixed effect w/ robust se)
 
+log close

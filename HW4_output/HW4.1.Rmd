@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Exercise 1
 ```{r message=FALSE, warning=FALSE}
 rm(list=ls())
+set.seed(2)
 setwd("C:/Users/jiere/Dropbox/Spring 2019/ECON 613/ECON613_HW/HW4_output")
 # install.packages("lme4")
 # install.packages("Matrix")
@@ -169,7 +170,7 @@ ll.DVLS <- function(b){
   ll.s
   return(ll.s)
 }
-set.seed(1)
+
 y <- kt.rand$LOGWAGE
 X <- cbind(as.matrix(kt.rand[,c("EDUC","POTEXPER")]),as.matrix(dummy))
 b <- rnorm(102)
